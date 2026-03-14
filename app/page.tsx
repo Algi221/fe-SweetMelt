@@ -1,28 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
-import SequenceScroll from "@/components/SequenceScroll";
-import { ArrowRight, Star, Truck, ShieldCheck, Clock } from "lucide-react";
-import Lenis from "lenis";
+import TextType from "@/components/TextType";
+import ShinyText from "@/components/ShinyText";
+import CountUp from "@/components/CountUp";
+import LightRays from "@/components/LightRays";
+import CurvedLoop from "@/components/CurvedLoop";
+import { ArrowRight, Star, Truck, ShieldCheck, Clock, Instagram, MapPin, Mail, MessageCircle, Heart } from "lucide-react";
 
 const featuredItems = [
-  { 
-    id: "oreo-cheese",
-    image: "/images/oreoCheesseCake/1.jpeg", 
-    name: "Oreo Cheese", 
-    tagline: "Krim keju lumer dengan taburan biskuit Oreo yang renyah.", 
-    dark: true 
-  },
-  { 
-    id: "silky-pudding",
-    image: "/images/pudingCoklat/1.jpeg", 
-    name: "Silky Pudding Ball", 
-    tagline: "Puding sutra lembut dengan pilihan rasa Coklat atau Strawberry.", 
-    dark: false 
-  },
+  { image: "/images/oreoCheesseCake/1.jpeg", name: "Oreo Cheese", tagline: "Krim keju lumer dengan taburan biskuit Oreo yang renyah.", dark: true },
+  { image: "/images/pudingCoklat/1.jpeg", name: "Silky Pudding Ball", tagline: "Puding sutra lembut dengan pilihan rasa Coklat atau Strawberry.", dark: false },
 ];
 
 const features = [
@@ -32,6 +22,7 @@ const features = [
   { icon: <Star size={22} />, title: "4.9 ★ Rating", desc: "Dari 50+ pelanggan" },
 ];
 
+// Chocolate drip SVG component
 function ChocoDrips({ fromTop = true }: { fromTop?: boolean }) {
   const drips = [
     { x: 5, h: 60, w: 18 }, { x: 14, h: 90, w: 14 }, { x: 23, h: 50, w: 20 },
@@ -40,11 +31,13 @@ function ChocoDrips({ fromTop = true }: { fromTop?: boolean }) {
     { x: 93, h: 65, w: 14 },
   ];
   return (
-    <div className={`absolute ${fromTop ? "top-0" : "bottom-0 rotate-180"} left-0 right-0 overflow-hidden pointer-events-none z-10`} style={{ height: 110 }}>
+    <div className={`absolute ${fromTop ? "top-0" : "bottom-0 rotate-180"} left-0 right-0 overflow-hidden pointer-events-none`} style={{ height: 110 }}>
       <svg viewBox="0 0 100 110" preserveAspectRatio="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
         {drips.map((d, i) => (
           <g key={i}>
+            {/* Drip body */}
             <rect x={d.x} y={0} width={d.w / 9} height={d.h} fill="#3d1f10" rx="2" />
+            {/* Drip bulb */}
             <ellipse cx={d.x + d.w / 18} cy={d.h + 8} rx={d.w / 16} ry={d.w / 14} fill="#3d1f10" />
           </g>
         ))}
@@ -55,140 +48,308 @@ function ChocoDrips({ fromTop = true }: { fromTop?: boolean }) {
 }
 
 export default function HomePage() {
-  useEffect(() => {
-    const lenis = new Lenis();
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-    return () => lenis.destroy();
-  }, []);
-
   return (
     <main className="min-h-screen bg-oreo-white">
       <Navbar />
 
-      {/* ─── SCROLLYTELLING HERO (Replaces Original Hero) ─── */}
-      <SequenceScroll />
+      {/* ─── HERO: Full-screen BLACK (Oreo dark side) ─── */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-oreo-black">
+        {/* Subtle texture */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle at 25% 25%, #6b3a2a 0%, transparent 50%), radial-gradient(circle at 75% 75%, #3d1f10 0%, transparent 50%)"
+        }} />
 
-      {/* Wrapping the rest of the original design to overlap the scroll section if needed */}
-      <div className="-mt-[100vh] relative z-20">
-        
-        {/* ─── FEATURES: White strip ─── */}
-        <section className="bg-oreo-white border-b border-oreo-light py-10 relative z-10">
-          <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {features.map((f, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2">
-                <div className="w-12 h-12 bg-oreo-black rounded-full flex items-center justify-center text-oreo-white mb-1">{f.icon}</div>
-                <p className="text-oreo-black font-semibold text-sm">{f.title}</p>
-                <p className="text-oreo-black/50 text-xs">{f.desc}</p>
+        {/* Cinematic Light Rays */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#d4af37"
+            raysSpeed={0.5}
+            lightSpread={0.8}
+            rayLength={2}
+            followMouse={true}
+            mouseInfluence={0.05}
+          />
+        </div>
+
+        {/* Floating oreo cookies */}
+        <div className="absolute top-24 left-12 text-6xl opacity-20 animate-float select-none">🍪</div>
+        <div className="absolute top-32 right-16 text-4xl opacity-15 animate-float-slow select-none" style={{ animationDelay: "2s" }}>🍫</div>
+        <div className="absolute bottom-40 left-20 text-5xl opacity-20 animate-float select-none" style={{ animationDelay: "3s" }}>🖤</div>
+        <div className="absolute bottom-32 right-24 text-5xl opacity-15 animate-float-slow select-none" style={{ animationDelay: "1s" }}>🍪</div>
+
+        {/* Hero text */}
+        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-24">
+          {/* Pill badge */}
+          <div className="inline-flex items-center gap-2 bg-oreo-white/10 border border-oreo-white/20 rounded-full px-5 py-2 text-sm mb-8 animate-fade-in">
+            <span className="w-2 h-2 bg-lumer-light rounded-full animate-pulse" />
+            <ShinyText 
+              text="Premium Dessert — Langsung ke Pintumu" 
+              color="rgba(255,255,255,0.7)"
+              shineColor="#ffffff"
+              speed={3}
+            />
+          </div>
+
+          <h1 className="font-display text-6xl sm:text-7xl md:text-8xl font-black text-oreo-white leading-[1.1] mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            Setiap Gigitan,<br />
+            <TextType 
+              text={["Penuh Rasa", "Lumer Terus", "Bikin Nagih"]}
+              className="text-lumer"
+              typingSpeed={100}
+              pauseDuration={2000}
+              cursorCharacter="_"
+              cursorClassName="text-white/30"
+            />
+          </h1>
+
+          <p className="text-oreo-white/60 text-lg md:text-xl max-w-xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            Dessert yang resepnya ga asal-asalan. Dari Oreo lumer sampai Cheese yang bikin nagih — semuanya ada di <span className="text-oreo-white font-semibold">SweetMelt!</span>
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            <Link href="/menu" className="bg-oreo-white text-oreo-black hover:bg-oreo-cream font-bold px-8 py-4 rounded-full transition-all duration-300 shadow-white hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2 group" id="hero-order-now">
+              Pesan Sekarang
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/#about" className="border-2 border-oreo-white/30 text-oreo-white/80 hover:border-oreo-white hover:text-oreo-white font-semibold px-8 py-4 rounded-full transition-all duration-300">
+              Tentang Kami →
+            </Link>
+          </div>
+        </div>
+
+        {/* Chocolate drips at bottom of hero */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <ChocoDrips fromTop={false} />
+          <div className="h-8 bg-oreo-white" />
+        </div>
+      </section>
+
+      {/* ─── FEATURES: White strip ─── */}
+      <section className="bg-oreo-white border-b border-oreo-light py-10">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {features.map((f, i) => (
+            <div key={i} className="flex flex-col items-center text-center gap-2">
+              <div className="w-12 h-12 bg-oreo-black rounded-full flex items-center justify-center text-oreo-white mb-1">{f.icon}</div>
+              <p className="text-oreo-black font-semibold text-sm">{f.title}</p>
+              <p className="text-oreo-black/50 text-xs">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── FEATURED MENU: White bg ─── */}
+      <section id="featured" className="py-24 px-6 bg-oreo-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="text-lumer-mid text-xs font-bold tracking-widest uppercase mb-3">✨ Pilihan Terbaik</p>
+            <h2 className="section-title mb-4">Menu <span className="text-lumer">Kami</span></h2>
+            <div className="oreo-divider max-w-xs mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
+            {featuredItems.map((item, i) => (
+              <div
+                key={i}
+                className={`rounded-4xl overflow-hidden relative group hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col ${
+                  item.dark
+                    ? "bg-oreo-black text-oreo-white shadow-oreo-lg"
+                    : "bg-oreo-cream border-2 border-oreo-light text-oreo-black shadow-oreo"
+                }`}
+              >
+                {/* Image top half */}
+                <div className="relative w-full h-64 overflow-hidden mb-6">
+                  <Image 
+                    src={item.image} 
+                    alt={item.name} 
+                    fill 
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  {/* Subtle gradient overlay to blend into the card color */}
+                  <div className={`absolute inset-0 bg-gradient-to-t ${item.dark ? 'from-oreo-black' : 'from-oreo-cream'} via-transparent to-transparent opacity-80`} />
+                </div>
+                
+                <div className="relative z-10 px-8 pb-8 flex-1 flex flex-col">
+                  <h3 className={`font-display text-xl font-bold mb-2 ${item.dark ? "text-oreo-white" : "text-oreo-black"}`}>
+                    {item.name}
+                  </h3>
+                  <p className={`text-sm ${item.dark ? "text-oreo-white/60" : "text-oreo-black/60"}`}>
+                    {item.tagline}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
-        </section>
 
-        {/* ─── FEATURED MENU ─── */}
-        <section id="featured" className="py-24 px-6 bg-oreo-white relative z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <p className="text-lumer-mid text-xs font-bold tracking-widest uppercase mb-3 text-lumer">✨ Pilihan Terbaik</p>
-              <h2 className="text-4xl md:text-5xl font-black text-oreo-black leading-tight mb-4 tracking-tighter uppercase italic">Menu <span className="text-lumer">Kami</span></h2>
-              <div className="w-24 h-1.5 bg-lumer mx-auto rounded-full" />
+          <div className="text-center">
+            <Link href="/menu" className="btn-primary inline-flex items-center gap-2 group text-base" id="see-all-menu">
+              Lihat Semua Menu
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ARCHITECTURAL MARQUEE ─── */}
+      <section className="bg-oreo-white overflow-hidden py-10">
+        <CurvedLoop 
+          marqueeText="PREMIUM DESSERT ✦ OREO MELT ✦ SILKY PUDDING ✦ FRESH MADE ✦ "
+          speed={1.5}
+          curveAmount={80}
+          className="font-display italic text-oreo-black opacity-5"
+        />
+      </section>
+
+
+      {/* ─── ABOUT: Black section (Oreo dark cookie) ─── */}
+      <section id="about" className="relative bg-oreo-black py-28 px-6 overflow-hidden">
+        {/* Top drips from white section */}
+        <ChocoDrips fromTop={true} />
+
+        <div className="max-w-3xl mx-auto text-center relative z-10 pt-8">
+          <p className="text-lumer-light text-xs font-bold tracking-widest uppercase mb-4">🍫 Tentang Kami</p>
+          <h2 className="section-title-white mb-6">
+            Dibuat dengan{" "}
+            <span className="italic text-oreo-cream">Cinta</span>{" "}
+            &{" "}
+            <span className="text-lumer">Usaha</span>
+          </h2>
+          <div className="mb-12">
+            <ShinyText 
+              text="SweetMelt lahir untuk hadirkan dessert yang gak cuma enak, tapi juga bikin momen jadi lebih spesial. Setiap produk dibuat fresh dengan bahan berkualitas — karena kamu berhak dapat yang terbaik!"
+              className="text-lg leading-relaxed font-medium"
+              color="rgba(255,255,255,0.55)"
+              shineColor="#ffffff"
+              speed={4}
+            />
+          </div>
+          <div className="flex justify-center gap-16 md:gap-24">
+            <div className="flex flex-col items-center">
+              <p className="font-display text-5xl font-black text-oreo-white flex items-center">
+                <CountUp from={0} to={50} duration={2} />
+                <span className="text-lumer ml-1">+</span>
+              </p>
+              <p className="text-oreo-white/40 text-xs font-bold uppercase tracking-widest mt-2">Pelanggan Puas</p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto">
-              {featuredItems.map((item, i) => (
-                <div
-                  key={i}
-                  className={`rounded-[2.5rem] overflow-hidden relative group hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col ${
-                    item.dark
-                      ? "bg-oreo-black text-oreo-white shadow-xl"
-                      : "bg-oreo-cream border-2 border-oreo-light text-oreo-black shadow-lg"
-                  }`}
-                >
-                  <div className="relative w-full h-64 overflow-hidden mb-6">
-                    <Image 
-                      src={item.image} 
-                      alt={item.name} 
-                      fill 
-                      className="object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${item.dark ? 'from-oreo-black' : 'from-oreo-cream'} via-transparent to-transparent opacity-80`} />
-                  </div>
-                  
-                  <div className="relative z-10 px-8 pb-8 flex-1 flex flex-col">
-                    <h3 className={`text-2xl font-black mb-2 uppercase italic tracking-tight ${item.dark ? "text-oreo-white" : "text-oreo-black"}`}>
-                      {item.name}
-                    </h3>
-                    <p className={`text-sm font-medium leading-relaxed ${item.dark ? "text-oreo-white/60" : "text-oreo-black/60"}`}>
-                      {item.tagline}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <Link href="/menu" className="inline-flex items-center gap-2 bg-oreo-black text-oreo-white hover:bg-lumer font-bold px-10 py-5 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl active:scale-95 text-base uppercase tracking-widest group">
-                Lihat Semua Menu
-                <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
-              </Link>
+            <div className="flex flex-col items-center">
+              <p className="font-display text-5xl font-black text-oreo-white flex items-center">
+                <CountUp from={0} to={4.9} duration={2} />
+                <span className="text-lumer-light text-2xl ml-1">★</span>
+              </p>
+              <p className="text-oreo-white/40 text-xs font-bold uppercase tracking-widest mt-2">Rating</p>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* ─── ABOUT: Black section ─── */}
-        <section id="about" className="relative bg-oreo-black py-32 px-6 overflow-hidden">
-          <ChocoDrips fromTop={true} />
-
-          <div className="max-w-3xl mx-auto text-center relative z-20 pt-12">
-            <p className="text-lumer-light text-xs font-black tracking-[0.4em] uppercase mb-6">🍫 Tentang Kami</p>
-            <h2 className="text-4xl md:text-6xl font-black text-oreo-white leading-tight mb-8 tracking-tighter uppercase italic">
-              Dibuat dengan <br />
-              <span className="italic text-oreo-cream">Cinta</span> & <span className="text-lumer">Usaha</span>
+        {/* Bottom drips back to white */}
+        <div className="absolute bottom-0 left-0 right-0 rotate-180">
+          <ChocoDrips fromTop={false} />
+          <div className="h-6 bg-oreo-white" />
+        </div>
+      </section>
+      {/* ─── READY TO ORDER CTA ─── */}
+      <section className="bg-oreo-white py-20 px-6 text-center">
+        <div className="max-w-4xl mx-auto bg-oreo-black rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: "url('/images/oreo_pattern.png')", backgroundSize: "200px" }} />
+          <div className="relative z-10">
+            <h2 className="font-display text-4xl md:text-6xl font-black text-oreo-white mb-6 leading-tight">
+              Siap untuk <br/><span className="text-lumer">Lumer</span> di Mulut?
             </h2>
-            <p className="text-oreo-white/60 text-lg leading-relaxed mb-16 font-medium">
-              SweetMelt lahir untuk hadirkan dessert yang gak cuma enak, tapi juga bikin
-              momen jadi lebih spesial. Setiap produk dibuat fresh dengan bahan berkualitas — karena kamu berhak dapat yang terbaik!
+            <p className="text-oreo-white/60 text-lg mb-10 max-w-lg mx-auto leading-relaxed">
+              Pesan sekarang untuk Pre-Order berikutnya dan rasakan kelezatan dessert premium kami langsung di rumahmu.
             </p>
-            <div className="flex justify-center gap-12 md:gap-20">
-              {[{ num: "500+", label: "Hapiness" }, { num: "20+", label: "Menu" }, { num: "4.9★", label: "Rating" }].map((s, i) => (
-                <div key={i}>
-                  <p className="text-4xl md:text-5xl font-black text-white italic tracking-tighter">{s.num}</p>
-                  <p className="text-white/30 text-[10px] uppercase font-black tracking-widest mt-2">{s.label}</p>
+            <Link href="/menu" className="inline-flex items-center gap-3 bg-lumer hover:bg-lumer-mid text-white font-bold px-10 py-5 rounded-full transition-all hover:scale-105 active:scale-95 shadow-xl">
+              Lihat Menu Sekarang <ArrowRight size={20} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER: Robust Grid Layout ─── */}
+      <footer className="bg-oreo-white border-t border-oreo-light pt-20 pb-10 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          
+          {/* Column 1: Brand */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-oreo-black flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full border-2 border-oreo-white flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-oreo-white" />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 rotate-180">
-            <ChocoDrips fromTop={false} />
-            <div className="h-6 bg-oreo-white" />
-          </div>
-        </section>
-
-        {/* ─── FOOTER ─── */}
-        <footer className="bg-oreo-white border-t border-oreo-light py-16 px-6 relative z-10">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-oreo-black flex items-center justify-center text-white font-black text-xl rotate-3">SM</div>
-              <span className="font-display font-black text-oreo-black text-2xl tracking-tighter uppercase italic">
+              </div>
+              <span className="font-display font-bold text-oreo-black text-2xl">
                 Sweet<span className="text-lumer">Melt</span>
               </span>
             </div>
-            <p className="text-oreo-black/40 text-xs font-bold uppercase tracking-widest text-center">© 2026 SweetMelt — Setiap Gigitan, Penuh Cita Rasa</p>
-            <div className="flex items-center gap-8">
-               <Link href="/menu" className="text-sm font-black text-oreo-black hover:text-lumer transition-colors uppercase tracking-widest">
-                 Pesan Sekarang →
-               </Link>
-               <Link href="/admin/login" className="text-[10px] font-black text-oreo-black/10 hover:text-lumer transition-colors uppercase tracking-widest">
-                 Admin
-               </Link>
+            <p className="text-oreo-black/50 text-sm leading-relaxed">
+              Menghadirkan dessert premium dengan bahan berkualitas tinggi. Setiap gigitan adalah bentuk cinta kami untuk para pecinta manis.
+            </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 rounded-full bg-oreo-cream flex items-center justify-center text-oreo-black hover:bg-lumer hover:text-white transition-all">
+                <Instagram size={18} />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-oreo-cream flex items-center justify-center text-oreo-black hover:bg-lumer hover:text-white transition-all">
+                <MessageCircle size={18} />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full bg-oreo-cream flex items-center justify-center text-oreo-black hover:bg-lumer hover:text-white transition-all">
+                <Mail size={18} />
+              </a>
             </div>
           </div>
-        </footer>
-      </div>
+
+          {/* Column 2: Quick Links */}
+          <div>
+            <h4 className="font-display font-bold text-oreo-black text-lg mb-6 uppercase tracking-widest text-xs opacity-40">Tautan Cepat</h4>
+            <ul className="space-y-4">
+              {['Beranda', 'Katalog Menu', 'Tentang Kami', 'Cara Pesan'].map((item) => (
+                <li key={item}>
+                  <Link href={item === 'Katalog Menu' ? '/menu' : '/'} className="text-oreo-black/60 hover:text-lumer font-medium transition-colors text-sm">
+                    {item}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Contact */}
+          <div>
+            <h4 className="font-display font-bold text-oreo-black text-lg mb-6 uppercase tracking-widest text-xs opacity-40">Hubungi Kami</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-sm text-oreo-black/60">
+                <MapPin size={18} className="text-lumer shrink-0" />
+                <span>Puri asri 1, perumahan puri asri, blok C3 No. 4, Gandoang, Kec. Cileungsi, Kabupaten Bogor</span>
+              </li>
+              <li className="flex items-center gap-3 text-sm text-oreo-black/60">
+                <MessageCircle size={18} className="text-lumer shrink-0" />
+                <span>+62 896-9989-3242</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Operational */}
+          <div>
+            <h4 className="font-display font-bold text-oreo-black text-lg mb-6 uppercase tracking-widest text-xs opacity-40">Pengiriman PO</h4>
+            <div className="bg-lumer/5 border border-lumer/10 rounded-2xl p-5">
+              <p className="text-oreo-black/70 text-sm font-bold mb-2">Selasa, 17 Maret 2026</p>
+              <p className="text-oreo-black/50 text-xs leading-relaxed">
+                Pengantaran dilakukan setiap hari Selasa. Pastikan sudah memesan sebelum hari Senin malam!
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="max-w-7xl mx-auto pt-8 border-t border-oreo-light flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-oreo-black/30 text-xs flex items-center gap-1">
+            © 2026 SweetMelt. Made with <Heart size={12} className="text-red-400 fill-red-400" /> for dessert lovers.
+          </p>
+          <div className="flex items-center gap-6">
+            <Link href="/" className="text-oreo-black/30 hover:text-oreo-black text-xs transition-colors">Privacy Policy</Link>
+            <Link href="/" className="text-oreo-black/30 hover:text-oreo-black text-xs transition-colors">Terms of Service</Link>
+            <Link href="/admin/login" className="text-oreo-black/10 hover:text-lumer text-[10px] transition-colors">Admin Login</Link>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

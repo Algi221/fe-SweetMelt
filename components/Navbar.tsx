@@ -1,128 +1,129 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Instagram, Twitter, Facebook, ArrowRight } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { ShoppingCart, Menu, X } from "lucide-react";
+import { useCart } from "@/lib/cartStore";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { items } = useCart();
+  const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  // Close menu on route change
+  // Detect if we're on the hero (dark) section or white section
+  const [heroBg, setHeroBg] = useState(true);
+
   useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      // After hero section (~100vh), switch to dark links
+      setHeroBg(window.scrollY < window.innerHeight * 0.7);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Menu", href: "/menu" },
-    { name: "Order", href: "/cart" },
-    { name: "Admin", href: "/admin/login" },
-  ];
-
-  const socialLinks = [
-    { icon: <Instagram size={20} />, href: "#" },
-    { icon: <Twitter size={20} />, href: "#" },
-    { icon: <Facebook size={20} />, href: "#" },
-  ];
+  // On non-home pages, always show dark navbar
+  const isHome = pathname === "/";
+  const showDark = !isHome || scrolled || !heroBg;
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-[100] px-6 md:px-12 py-8 flex justify-between items-center pointer-events-none">
-        {/* Logo */}
-        <Link href="/" className="pointer-events-auto flex items-center gap-3 group">
-           <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-900 text-xl font-black shadow-xl group-hover:rotate-12 transition-transform">
-              SM
-           </div>
-           <span className={`font-display font-black text-2xl tracking-tighter uppercase italic transition-colors ${isOpen ? 'text-white' : 'text-white'}`}>
-              Sweet<span className="text-lumer">Melt</span>
-           </span>
-        </Link>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${
+          scrolled || !isHome
+            ? "glassmorphism-light shadow-oreo py-3"
+            : "bg-transparent py-5"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between relative">
 
-        {/* Menu Button */}
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="pointer-events-auto w-14 h-14 rounded-full bg-white text-slate-950 flex flex-col items-center justify-center gap-1.5 shadow-2xl hover:bg-lumer hover:text-white transition-all active:scale-90 group"
-        >
-          <motion.div 
-            animate={isOpen ? { rotate: 45, y: 4 } : { rotate: 0, y: 0 }}
-            className="w-6 h-[2px] bg-current rounded-full"
-          />
-          <motion.div 
-            animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
-            className="w-6 h-[2px] bg-current rounded-full"
-          />
-          <motion.div 
-            animate={isOpen ? { rotate: -45, y: -4 } : { rotate: 0, y: 0 }}
-            className="w-6 h-[2px] bg-current rounded-full"
-          />
-        </button>
-      </nav>
+            {/* Left nav links */}
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="/" className={showDark ? "nav-link" : "nav-link-white"}>
+                Beranda
+              </Link>
+              <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-semibold" : ""}`}>
+                Menu
+              </Link>
+              <Link href="/admin/login" className={`${showDark ? "nav-link" : "nav-link-white"} opacity-40 hover:opacity-100 transition-opacity`}>
+                Admin
+              </Link>
+            </div>
 
-      {/* Fullscreen Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-100%" }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 z-[90] bg-slate-950 flex flex-col pt-40 px-6 md:px-32 pb-20 justify-between overflow-hidden"
-          >
-             {/* Background Text */}
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-black text-white/5 uppercase select-none pointer-events-none leading-none italic">
-                Sweet
-             </div>
-
-             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20">
-                <div className="space-y-4">
-                   <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] mb-10">Navigation</p>
-                   {navLinks.map((link, i) => (
-                     <div key={i} className="overflow-hidden">
-                        <motion.div
-                          initial={{ y: 100 }}
-                          animate={{ y: 0 }}
-                          transition={{ delay: 0.3 + (i * 0.1), duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-                        >
-                          <Link 
-                            href={link.href}
-                            className={`group flex items-center gap-6 text-6xl md:text-9xl font-black uppercase italic tracking-tighter transition-all hover:pl-10 ${pathname === link.href ? 'text-lumer' : 'text-white/20 hover:text-white'}`}
-                          >
-                             {link.name} <ArrowRight className="opacity-0 group-hover:opacity-100 transition-all text-lumer" size={60} />
-                          </Link>
-                        </motion.div>
-                     </div>
-                   ))}
+            {/* Center logo — absolutely centered */}
+            <Link
+              href="/"
+              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
+            >
+              {/* Oreo cookie SVG logo */}
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${showDark ? "bg-oreo-black" : "bg-oreo-white"}`}>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${showDark ? "border-oreo-white" : "border-oreo-black"}`}>
+                  <div className={`w-2 h-2 rounded-full ${showDark ? "bg-oreo-white" : "bg-oreo-black"}`} />
                 </div>
+              </div>
+              <span className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${showDark ? "text-oreo-black" : "text-oreo-white"}`}>
+                Sweet<span className={showDark ? "text-lumer" : "text-caramel"}>Melt</span>
+              </span>
+            </Link>
 
-                <div className="flex flex-col justify-end space-y-12">
-                   <div className="space-y-4">
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Social Media</p>
-                      <div className="flex gap-6">
-                         {socialLinks.map((s, i) => (
-                           <Link key={i} href={s.href} className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-lumer hover:border-lumer transition-all">
-                              {s.icon}
-                           </Link>
-                         ))}
-                      </div>
-                   </div>
-                   
-                   <div className="space-y-4">
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Contact Us</p>
-                      <p className="text-2xl font-black text-white uppercase italic">SweetMelt@gmail.com <br /> +62 896-9989-3242</p>
-                   </div>
-                </div>
-             </div>
+            {/* Right items */}
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="/#about" className={showDark ? "nav-link" : "nav-link-white"}>
+                Tentang Kami
+              </Link>
+              <Link
+                href="/cart"
+                className={`relative flex items-center gap-1.5 font-semibold text-sm px-4 py-2 rounded-full transition-all duration-300 ${
+                  showDark
+                    ? "bg-oreo-black text-oreo-white hover:bg-oreo-gray"
+                    : "bg-oreo-white text-oreo-black hover:bg-oreo-cream"
+                }`}
+                id="cart-button"
+              >
+                <ShoppingCart size={15} />
+                <span>Keranjang</span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-lumer text-oreo-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
 
-             <div className="relative z-10 flex justify-between items-center text-[10px] font-black text-white/20 uppercase tracking-widest pt-20 border-t border-white/5">
-                <p>© 2026 SweetMelt Artisan</p>
-                <p>Designed for Perfection</p>
-             </div>
-          </motion.div>
+            {/* Mobile toggle */}
+            <button
+              className={`md:hidden ml-auto transition-colors ${showDark ? "text-oreo-black hover:text-lumer" : "text-oreo-white hover:text-oreo-cream"}`}
+              onClick={() => setMobileOpen(!mobileOpen)}
+              id="mobile-menu-toggle"
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="md:hidden glassmorphism-light mt-2 mx-4 rounded-2xl p-5 animate-fade-in border border-oreo-light shadow-oreo-lg">
+            <div className="flex flex-col gap-4">
+              {[{ href: "/", label: "Beranda" }, { href: "/menu", label: "Menu" }, { href: "/#about", label: "Tentang Kami" }, { href: "/admin/login", label: "Admin" }].map((l) => (
+                <Link key={l.href} href={l.href} className="nav-link text-base border-b border-oreo-light pb-2 last:border-none" onClick={() => setMobileOpen(false)}>
+                  {l.label}
+                </Link>
+              ))}
+              <div className="oreo-divider" />
+              <Link href="/cart" className="btn-primary text-center text-sm flex items-center justify-center gap-2" onClick={() => setMobileOpen(false)}>
+                <ShoppingCart size={15} />
+                Keranjang {totalItems > 0 && `(${totalItems})`}
+              </Link>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </nav>
     </>
   );
 }

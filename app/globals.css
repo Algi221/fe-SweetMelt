@@ -1,112 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --oreo-black: #0a0a0a;
-  --oreo-white: #ffffff;
-  --oreo-cream: #fef3c7;
-  --oreo-light: #f3f4f6;
-  --lumer: #d97706;
-  --lumer-light: #fbbf24;
-  --lumer-mid: #b45309;
-}
-
 @layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  /* Default: bright white background, black text — like an Oreo cream */
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-outfit), sans-serif;
+    background-color: #ffffff;
+    color: #111111;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
   }
 }
 
-html.lenis {
-  height: auto;
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    @apply bg-oreo-black hover:bg-oreo-gray text-oreo-white font-semibold px-6 py-3 rounded-full transition-all duration-300 shadow-oreo hover:shadow-oreo-lg hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .btn-lumer {
+    @apply bg-lumer hover:bg-lumer-mid text-oreo-white font-semibold px-6 py-3 rounded-full transition-all duration-300 shadow-lumer hover:shadow-lumer-lg hover:-translate-y-0.5;
+  }
+  .btn-outline {
+    @apply border-2 border-oreo-black text-oreo-black hover:bg-oreo-black hover:text-oreo-white font-semibold px-6 py-3 rounded-full transition-all duration-300;
+  }
+
+  /* ── Cards ── */
+  .card-oreo {
+    @apply bg-oreo-white border border-oreo-light rounded-2xl overflow-hidden shadow-oreo hover:shadow-oreo-lg transition-all duration-300 hover:-translate-y-1;
+  }
+  .card-dark {
+    @apply bg-oreo-dark border border-oreo-gray/50 rounded-2xl overflow-hidden shadow-oreo transition-all duration-300 hover:-translate-y-1;
+  }
+
+  /* ── Nav ── */
+  .nav-link {
+    @apply text-oreo-black/70 hover:text-oreo-black transition-colors duration-200 font-medium text-sm tracking-wide;
+  }
+  .nav-link-white {
+    @apply text-oreo-white/80 hover:text-oreo-white transition-colors duration-200 font-medium text-sm tracking-wide;
+  }
+
+  /* ── Typography ── */
+  .section-title {
+    @apply font-display text-4xl md:text-5xl font-bold text-oreo-black;
+  }
+  .section-title-white {
+    @apply font-display text-4xl md:text-5xl font-bold text-oreo-white;
+  }
+
+  /* ── Form inputs ── */
+  .input-field {
+    @apply w-full bg-oreo-cream border border-oreo-light rounded-xl px-4 py-3 text-oreo-black placeholder-oreo-black/30 focus:outline-none focus:border-oreo-black focus:ring-1 focus:ring-oreo-black transition-colors;
+  }
+  .input-field-dark {
+    @apply w-full bg-oreo-gray border border-oreo-gray rounded-xl px-4 py-3 text-oreo-white placeholder-oreo-white/30 focus:outline-none focus:border-oreo-white focus:ring-1 focus:ring-oreo-white/50 transition-colors;
+  }
+
+  /* ── Misc ── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold;
+  }
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto;
-}
-
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
-.lenis.lenis-stopped {
-  overflow: hidden;
-}
-
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
-}
-
-/* Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slide-right {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slide-left {
-  from { opacity: 0; transform: translateX(30px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.animate-float { animation: float 4s ease-in-out infinite; }
-.animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
-.animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-.animate-slide-right { animation: slide-right 0.8s ease-out forwards; }
-.animate-slide-left { animation: slide-left 0.8s ease-out forwards; }
-
-.section-title {
-  @apply font-display text-4xl md:text-5xl font-black text-oreo-black leading-tight;
-}
-
-.section-title-white {
-  @apply font-display text-4xl md:text-5xl font-black text-oreo-white leading-tight;
-}
-
-.btn-primary {
-  @apply bg-oreo-black text-oreo-white hover:bg-lumer font-bold px-8 py-4 rounded-full transition-all duration-300 shadow-oreo hover:shadow-xl active:scale-95;
-}
-
-.rounded-4xl {
-  border-radius: 2rem;
-}
-
-/* Scrollbar Hide */
 @layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  /* Lumer (chocolate drip) text gradient */
+  .text-lumer {
+    @apply bg-gradient-to-r from-lumer via-lumer-mid to-lumer-light bg-clip-text text-transparent;
   }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  /* Caramel accent gradient */
+  .text-caramel {
+    @apply bg-gradient-to-r from-caramel to-gold bg-clip-text text-transparent;
   }
-}
 
-/* Sequence Background Match */
-.bg-sequence {
-  background-color: #3d1f10;
-}
+  /* Glassmorphism — light version for white bg */
+  .glassmorphism-light {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(17, 17, 17, 0.08);
+  }
+  /* Glassmorphism — dark version */
+  .glassmorphism-dark {
+    background: rgba(17, 17, 17, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
-/* Text Reveal */
-.char {
-  display: inline-block;
+  /* Oreo stripe divider */
+  .oreo-divider {
+    background: linear-gradient(90deg, transparent, #111111, transparent);
+    height: 1px;
+  }
+  .lumer-divider {
+    background: linear-gradient(90deg, transparent, #6b3a2a, transparent);
+    height: 1px;
+  }
+
+  /* Drip SVG element helper */
+  .drip-shape {
+    border-radius: 0 0 50% 50%;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #f5f0ea; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #6b3a2a; }
 }
