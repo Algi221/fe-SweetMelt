@@ -136,23 +136,23 @@ export default function SequenceScroll() {
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         <canvas ref={canvasRef} className="w-full h-full" />
         
-        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center p-6">
-           <motion.div style={{ opacity: heroOpacity }} className="text-center w-full max-w-xs md:max-w-none">
-              <h1 className="text-5xl md:text-9xl font-black text-white leading-none tracking-tighter uppercase italic break-words">Sweet<span className="text-lumer">Melt</span></h1>
-              <p className="text-white/60 font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] mt-2 md:mt-4 text-[10px] md:text-sm">Authentic Handmade Dessert</p>
+        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center px-4 md:px-8">
+           <motion.div style={{ opacity: heroOpacity }} className="text-center w-full max-w-[320px] md:max-w-none">
+              <h1 className="text-4xl sm:text-5xl md:text-9xl font-black text-white leading-[0.9] tracking-tighter uppercase italic break-words mb-2">Sweet<span className="text-lumer">Melt</span></h1>
+              <p className="text-white/60 font-bold uppercase tracking-[0.1em] md:tracking-[0.4em] text-[8px] sm:text-[10px] md:text-sm">Authentic Handmade Dessert</p>
            </motion.div>
 
-           <motion.div style={{ opacity: slogan1Opacity, x: slogan1X }} className="absolute left-6 md:left-24 max-w-[280px] md:max-w-md text-left">
-              <h2 className="text-3xl md:text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">The <span className="text-lumer">Melting</span><br />Point of Bliss.</h2>
+           <motion.div style={{ opacity: slogan1Opacity, x: slogan1X }} className="absolute left-4 sm:left-6 md:left-24 max-w-[240px] sm:max-w-[280px] md:max-w-md text-left">
+              <h2 className="text-2xl sm:text-3xl md:text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">The <span className="text-lumer">Melting</span><br />Point of Bliss.</h2>
            </motion.div>
 
-           <motion.div style={{ opacity: slogan2Opacity, x: slogan2X }} className="absolute right-6 md:right-24 max-w-[280px] md:max-w-md text-right">
-              <h2 className="text-3xl md:text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">Crafted for <br />The <span className="text-lumer">Extraordinary</span></h2>
+           <motion.div style={{ opacity: slogan2Opacity, x: slogan2X }} className="absolute right-4 sm:right-6 md:right-24 max-w-[240px] sm:max-w-[280px] md:max-w-md text-right">
+              <h2 className="text-2xl sm:text-3xl md:text-6xl font-black text-white leading-tight uppercase italic tracking-tighter">Crafted for <br />The <span className="text-lumer">Extraordinary</span></h2>
            </motion.div>
 
            <motion.div style={{ opacity: ctaOpacity, scale: ctaScale }} className="text-center pointer-events-auto px-4">
               <h2 className="text-4xl md:text-7xl font-black text-white mb-6 md:mb-8 uppercase italic leading-none tracking-tighter">Ready to melt?</h2>
-              <button className="px-10 py-5 md:px-12 md:py-6 bg-white text-slate-950 rounded-full font-black uppercase text-xs md:text-sm tracking-widest hover:bg-lumer hover:text-white transition-all shadow-2xl active:scale-95">Order Your Delight</button>
+              <button className="px-8 py-4 md:px-12 md:py-6 bg-white text-slate-950 rounded-full font-black uppercase text-[10px] md:text-sm tracking-widest hover:bg-lumer hover:text-white transition-all shadow-2xl active:scale-95">Order Your Delight</button>
            </motion.div>
         </div>
 
