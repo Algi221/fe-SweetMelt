@@ -24,13 +24,20 @@ export default function ProductCard({ product }: { product: Product }) {
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(price);
 
+  const sanitizeImageUrl = (url: string) => {
+    if (!url) return "";
+    return url
+      .replace("/images/pudingCoklat/", "/images/puding/")
+      .replace("/images/pudingStrawberry/", "/images/puding/");
+  };
+
   return (
     <div className="card-oreo group flex flex-col" id={`product-${product.id}`}>
       {/* Image */}
       <Link href={`/product/${product.id}`} className="relative h-52 overflow-hidden bg-oreo-cream block">
         {!imgError ? (
           <img
-            src={product.image_url}
+            src={sanitizeImageUrl(product.image_url)}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onError={() => setImgError(true)}
@@ -80,7 +87,7 @@ export default function ProductCard({ product }: { product: Product }) {
                    window.location.href = `/product/${product.id}`;
                    return;
                 }
-                addItem({ id: product.id, name: product.name, price: product.price, image_url: product.image_url });
+                addItem({ id: product.id, name: product.name, price: product.price, image_url: sanitizeImageUrl(product.image_url) });
                 toast.success(`${product.name} masuk keranjang! 🎉`);
               }}
               className="flex items-center gap-1.5 btn-primary py-2 px-4 text-sm"
@@ -100,7 +107,7 @@ export default function ProductCard({ product }: { product: Product }) {
               </button>
               <span className="text-oreo-black font-bold w-6 text-center">{qty}</span>
               <button
-                onClick={() => addItem({ id: product.id, name: product.name, price: product.price, image_url: product.image_url })}
+                onClick={() => addItem({ id: product.id, name: product.name, price: product.price, image_url: sanitizeImageUrl(product.image_url) })}
                 className="w-8 h-8 rounded-full bg-oreo-black text-oreo-white hover:bg-oreo-gray transition-all flex items-center justify-center"
                 id={`increase-${product.id}`}
               >

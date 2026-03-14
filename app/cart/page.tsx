@@ -13,6 +13,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const formatPrice = (p: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
 
+const sanitizeImageUrl = (url: string) => {
+  if (!url) return "";
+  return url
+    .replace("/images/pudingCoklat/", "/images/puding/")
+    .replace("/images/pudingStrawberry/", "/images/puding/");
+};
+
 function isValidPhone(phone: string) {
   return /^(\+62|62|0)8[1-9][0-9]{7,11}$/.test(phone.replace(/\s|-/g, ""));
 }
@@ -147,7 +154,7 @@ export default function CartPage() {
             {items.map((item) => (
               <div key={`${item.id}-${item.variant}`} className="flex items-center gap-4 bg-oreo-white border border-oreo-light rounded-2xl p-4 shadow-oreo">
                 <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-oreo-cream">
-                  <img src={item.image_url} alt={item.name} className="w-full h-full object-cover"
+                  <img src={sanitizeImageUrl(item.image_url)} alt={item.name} className="w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
                 <div className="flex-1 min-w-0">
