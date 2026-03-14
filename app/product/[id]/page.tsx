@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -23,6 +23,13 @@ interface Product {
 const formatPrice = (p: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
 
+const sanitizeImageUrl = (url: string) => {
+  if (!url) return "";
+  return url
+    .replace("/images/pudingCoklat/", "/images/puding/")
+    .replace("/images/pudingStrawberry/", "/images/puding/");
+};
+
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params?.id as string;
@@ -34,7 +41,25 @@ export default function ProductDetailPage() {
   const [variant, setVariant] = useState<string | undefined>(undefined);
   const [isLiked, setIsLiked] = useState(false);
   
-  const isSilky = product?.name.toLowerCase().includes("silky") || false;
+  const isSilky = product?.name.toLowerCase().includes("silky") || product?.name.toLowerCase().includes("pudding") || false;
+  const isOreo = product?.name.toLowerCase().includes("oreo") || false;
+
+  // Manual Gallery mapping for local images if Supabase doesn't have them
+  const localGallery = useMemo(() => {
+     if (isOreo) return ["/images/oreoCheesseCake/1.jpeg", "/images/oreoCheesseCake/2.jpeg", "/images/oreoCheesseCake/3.jpeg"];
+     if (isSilky) return ["/images/puding/1.jpeg", "/images/puding/2.png", "/images/puding/3.png"];
+     return [];
+  }, [isOreo, isSilky]);
+
+  // Combined images from DB and local fallback
+  const allImages = useMemo(() => {
+    const dbImages = [product?.image_url, ...(product?.gallery_urls || [])]
+      .filter(Boolean)
+      .map(img => sanitizeImageUrl(img as string));
+    const combined = Array.from(new Set([...dbImages, ...localGallery]));
+    // Filter out common broken placeholders or invalid paths if needed
+    return combined.length > 0 ? combined : ["/placeholder.png"];
+  }, [product, localGallery]);
 
   useEffect(() => {
     if (!productId) return;
@@ -43,13 +68,15 @@ export default function ProductDetailPage() {
       .then((data) => {
         const prod = data.data;
         if (prod) {
+          const sanitizedImg = sanitizeImageUrl(prod.image_url);
           setProduct(prod);
-          setMainImage(prod.image_url);
+          // Set main image to the first one that exists
+          setMainImage(sanitizedImg || localGallery[0] || "");
         }
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [productId]);
+  }, [productId, localGallery]);
 
   useEffect(() => {
     if (isSilky && !variant) {
@@ -59,9 +86,9 @@ export default function ProductDetailPage() {
 
   // Auto-switch image based on variant for Silky Pudding
   useEffect(() => {
-    if (isSilky) {
-       if (variant === "Coklat") setMainImage("/images/pudingCoklat/1.jpeg");
-       if (variant === "Strawberry") setMainImage("/images/pudingStrawberry/1.jpeg");
+    if (isSilky && variant) {
+       // Just update main image to the first local one when switching flavor
+       setMainImage("/images/puding/1.jpeg");
     }
   }, [variant, isSilky]);
 
@@ -96,7 +123,6 @@ export default function ProductDetailPage() {
 
   const cartItem = items.find((i) => i.id === product.id && i.variant === variant);
   const qty = cartItem?.quantity || 0;
-  const allImages = Array.from(new Set([product.image_url, ...(product.gallery_urls || [])])).filter(Boolean);
 
   return (
     <main className="min-h-screen bg-white selection:bg-lumer/30">
@@ -123,16 +149,25 @@ export default function ProductDetailPage() {
             
             {/* LEFT: Image Gallery */}
             <div className="lg:col-span-7 space-y-6">
-               <div className="relative group animate-fade-in shadow-2xl rounded-[2.5rem] overflow-hidden bg-slate-100 border-8 border-white">
-                  {!imgError ? (
-                    <img
-                      src={mainImage}
-                      alt={product.name}
-                      className="w-full aspect-square object-cover transition-transform duration-700 group-hover:scale-110"
-                      onError={() => setImgError(true)}
-                    />
-                  ) : (
-                    <div className="w-full aspect-square flex items-center justify-center bg-slate-100 text-9xl">🍪</div>
+                <div className="relative group animate-fade-in shadow-2xl rounded-[3rem] overflow-hidden bg-slate-50 border-[12px] border-white">
+                  <img
+                    src={mainImage}
+                    alt={product.name}
+                    className={`w-full aspect-square object-cover transition-all duration-700 ${imgError ? 'blur-sm grayscale opacity-30' : 'group-hover:scale-105'}`}
+                    onError={() => {
+                      if (mainImage !== allImages[0]) {
+                        setMainImage(allImages[0]);
+                      } else {
+                        setImgError(true);
+                      }
+                    }}
+                  />
+                  
+                  {imgError && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 bg-slate-100/50 backdrop-blur-sm">
+                       <span className="text-6xl mb-4">🍨</span>
+                       <p className="font-bold text-xs uppercase tracking-[0.2em]">Image Coming Soon</p>
+                    </div>
                   )}
                   
                   {/* Floating Badges */}
@@ -228,13 +263,18 @@ export default function ProductDetailPage() {
                     </div>
                   )}
 
-                  <div className="bg-slate-50 rounded-[2rem] p-8 space-y-6 border border-slate-100 relative overflow-hidden group">
-                     {/* Gloss Effect */}
-                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+                  <div className="bg-[#fcfaf7] rounded-[2.5rem] p-10 space-y-8 border border-oreo-light/30 relative overflow-hidden group shadow-sm">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-lumer/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
                      
-                     <div className="relative">
-                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Total Harga</p>
-                        <p className="text-5xl font-black text-slate-900">{formatPrice(product.price)}</p>
+                     <div className="relative flex justify-between items-center">
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Harga Terbaik</p>
+                          <p className="text-5xl font-black text-slate-900 tracking-tighter">{formatPrice(product.price)}</p>
+                        </div>
+                        <div className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
+                           <p className="text-[9px] font-black text-slate-400 uppercase">Stok</p>
+                           <p className="text-xs font-bold text-emerald-600">Ada (Fresh)</p>
+                        </div>
                      </div>
 
                      <div className="grid grid-cols-1 gap-4 relative">

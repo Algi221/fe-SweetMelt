@@ -12,7 +12,7 @@ import { ArrowRight, Star, Truck, ShieldCheck, Clock, Instagram, MapPin, Mail, M
 
 const featuredItems = [
   { image: "/images/oreoCheesseCake/1.jpeg", name: "Oreo Cheese", tagline: "Krim keju lumer dengan taburan biskuit Oreo yang renyah.", dark: true },
-  { image: "/images/pudingCoklat/1.jpeg", name: "Silky Pudding Ball", tagline: "Puding sutra lembut dengan pilihan rasa Coklat atau Strawberry.", dark: false },
+  { image: "/images/puding/1.jpeg", name: "Silky Pudding Ball", tagline: "Puding sutra lembut dengan pilihan rasa Coklat atau Strawberry.", dark: false },
 ];
 
 const features = [
