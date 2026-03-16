@@ -106,7 +106,7 @@ const LightRays: React.FC<LightRaysProps> = ({
   const animationIdRef = useRef<number | null>(null);
   const meshRef = useRef<Mesh | null>(null);
   const cleanupFunctionRef = useRef<(() => void) | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }`;
 
-      const frag = `precision highp float;
+      const frag = `precision mediump float;
 
 uniform float iTime;
 uniform vec2  iResolution;
@@ -253,7 +253,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor.rgb = mix(vec3(gray), fragColor.rgb, saturation);
   }
 
-  fragColor.rgb *= raysColor;
+  fragColor.rgb *= raysColor * 1.5;
 }
 
 void main() {
@@ -439,9 +439,22 @@ void main() {
       mouseRef.current = { x, y };
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!containerRef.current || !rendererRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const touch = e.touches[0];
+      const x = (touch.clientX - rect.left) / rect.width;
+      const y = (touch.clientY - rect.top) / rect.height;
+      mouseRef.current = { x, y };
+    };
+
     if (followMouse) {
       window.addEventListener("mousemove", handleMouseMove);
-      return () => window.removeEventListener("mousemove", handleMouseMove);
+      window.addEventListener("touchmove", handleTouchMove, { passive: true });
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("touchmove", handleTouchMove);
+      };
     }
   }, [followMouse]);
 

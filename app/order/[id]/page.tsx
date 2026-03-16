@@ -209,8 +209,6 @@ export default function OrderStatusPage() {
               <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-5 h-5 invert brightness-0" />
               Konfirmasi via WhatsApp
             </a>
-          </div>
-
           {isPending && order.payment_method === "gateway" && (
             <div className="flex flex-col gap-3 p-4 bg-oreo-cream/30 rounded-2xl border-2 border-dashed border-oreo-black/20 text-center animate-slide-up">
               <p className="text-sm font-bold text-oreo-black mb-1 flex items-center justify-center gap-2">
@@ -241,8 +239,28 @@ export default function OrderStatusPage() {
               <p className="text-[10px] text-oreo-black/40 mt-1">
                 Aman & Terverifikasi oleh <span className="font-bold">Midtrans</span>.
               </p>
+
+              {/* Simulation Button for Testing */}
+              <button 
+                onClick={async () => {
+                  if (confirm("Simulasi pembayaran berhasil? (Hanya untuk testing)")) {
+                    try {
+                      const res = await fetch(`${API_URL}/api/payment/simulate-success`, {
+                        method: "POST", headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ order_id: order.id }),
+                      });
+                      if (res.ok) window.location.reload();
+                      else alert("Gagal simulasi.");
+                    } catch (e) { alert("Terjadi kesalahan."); }
+                  }
+                }}
+                className="mt-4 text-[10px] text-lumer/40 hover:text-lumer transition-colors underline"
+              >
+                Simulasi Bayar Berhasil (Khusus Testing)
+              </button>
             </div>
           )}
+       </div>
 
           {isPending && order.duitku_reference && (
              <p className="text-center text-sm text-oreo-black/50 my-2">

@@ -60,7 +60,7 @@ export default function HomePage() {
         }} />
 
         {/* Cinematic Light Rays */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-60">
           <LightRays
             raysOrigin="top-center"
             raysColor="#d4af37"
@@ -265,6 +265,50 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── MAP SECTION ─── */}
+      <section className="bg-oreo-white py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-lumer-mid text-xs font-bold tracking-widest uppercase mb-3 text-center">📍 Kunjungi Kami</p>
+            <h2 className="section-title mb-4">Lokasi <span className="text-lumer">Produksi</span></h2>
+            <p className="text-oreo-black/50 text-sm max-w-md mx-auto">Tebarkan kebahagiaan dari dapur kami langsung ke pintu rumahmu.</p>
+          </div>
+          
+          <div className="rounded-4xl overflow-hidden border-4 border-oreo-black shadow-oreo-lg h-[450px] relative group">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.176378453472!2d106.8920197750731!3d-6.362141993627916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69eb7458a5387f%3A0x2b523761a223a629!2sJl.%20Pahlawan%201%20No.43%2C%20RT.005%2FRW.024%2C%20Sukatani%2C%20Kec.%20Tapos%2C%20Kota%20Depok%2C%20Jawa%20Barat%2016461!5e0!3m2!1sid!2sid!4v1710570000000!5m2!1sid!2sid" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="grayscale-[0.5] contrast-[1.1] group-hover:grayscale-0 transition-all duration-700"
+            ></iframe>
+            
+            {/* Overlay Info Card */}
+            <div className="absolute bottom-6 left-6 right-6 md:right-auto md:w-80 bg-oreo-black text-oreo-white p-6 rounded-3xl shadow-2xl animate-fade-in">
+              <div className="flex items-start gap-3">
+                <MapPin className="text-lumer shrink-0 mt-1" size={20} />
+                <div>
+                  <h4 className="font-bold text-lg mb-1">Dapur SweetMelt</h4>
+                  <p className="text-xs text-oreo-white/60 leading-relaxed">
+                    Jl. Pahlawan 1 No.43, RT.005/RW.024, Sukatani, Kec. Tapos, Kota Depok, Jawa Barat 16461
+                  </p>
+                  <a 
+                    href="https://www.google.com/maps/dir/?api=1&destination=-6.362142,106.8920198" 
+                    target="_blank" 
+                    className="inline-flex items-center gap-2 text-lumer-light font-bold text-xs mt-4 hover:underline"
+                  >
+                    Petunjuk Arah <ArrowRight size={14} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── FOOTER: Robust Grid Layout ─── */}
       <footer className="bg-oreo-white border-t border-oreo-light pt-20 pb-10 px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
@@ -317,7 +361,7 @@ export default function HomePage() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm text-oreo-black/60">
                 <MapPin size={18} className="text-lumer shrink-0" />
-                <span>Puri asri 1, perumahan puri asri, blok C3 No. 4, Gandoang, Kec. Cileungsi, Kabupaten Bogor</span>
+                <span>Jl. Pahlawan 1 No.43, RT.005/RW.024, Sukatani, Kec. Tapos, Kota Depok, Jawa Barat 16461</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-oreo-black/60">
                 <MessageCircle size={18} className="text-lumer shrink-0" />
