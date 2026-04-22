@@ -1,89 +1,56 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Check, Copy, Download, Share2 } from "lucide-react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sweetmelt.web.id";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fe-sweetmelt.vercel.app";
 const SITE_NAME = "SweetMelt";
 const SHARE_TEXT = "🍪 Cobain dessert premium SweetMelt! Silky Pudding & Oreo Cheese Cake yang lembut dan enak banget. Order sekarang yuk! 🍫";
 
+// QR Code via Google Charts API — zero dependency
+const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(SITE_URL)}&color=1a1a1a&bgcolor=ffffff&qzone=1&format=png`;
+const QR_DOWNLOAD_URL = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(SITE_URL)}&color=1a1a1a&bgcolor=ffffff&qzone=2&format=png`;
+
 export default function SharePage() {
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const qrRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(SITE_URL);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     } catch {
-      // fallback for older browsers
       const el = document.createElement("input");
       el.value = SITE_URL;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
       document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleDownloadQR = () => {
-    const svg = qrRef.current;
-    if (!svg) return;
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const img = new Image();
-    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
-
-    img.onload = () => {
-      const size = 512;
-      canvas.width = size;
-      canvas.height = size;
-      if (ctx) {
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, size, size);
-        ctx.drawImage(img, 0, 0, size, size);
-        const pngUrl = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = pngUrl;
-        a.download = "sweetmelt-qrcode.png";
-        a.click();
-      }
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
+  const handleDownloadQR = async () => {
+    const response = await fetch(QR_DOWNLOAD_URL);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sweetmelt-qrcode.png";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const shareLinks = {
     whatsapp: `https://wa.me/?text=${encodeURIComponent(SHARE_TEXT + "\n\n" + SITE_URL)}`,
-    instagram: `https://www.instagram.com/`,  // IG tidak support direct share link, arahkan ke profil
-    tiktok: `https://www.tiktok.com/`,       // TikTok juga sama
     twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SITE_URL)}`,
   };
 
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: SITE_NAME,
-          text: SHARE_TEXT,
-          url: SITE_URL,
-        });
-      } catch {
-        // user cancelled
-      }
+        await navigator.share({ title: SITE_NAME, text: SHARE_TEXT, url: SITE_URL });
+      } catch { /* cancelled */ }
     } else {
       handleCopy();
     }
@@ -95,11 +62,9 @@ export default function SharePage() {
 
       {/* Hero */}
       <div className="bg-oreo-black pt-28 pb-36 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: "radial-gradient(circle at 20% 50%, #f5e6d3 0%, transparent 50%), radial-gradient(circle at 80% 20%, #c8a882 0%, transparent 40%)"
-          }}
-        />
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: "radial-gradient(circle at 20% 50%, #f5e6d3 0%, transparent 50%), radial-gradient(circle at 80% 20%, #c8a882 0%, transparent 40%)"
+        }} />
         <div className="relative z-10">
           <div className="inline-flex items-center gap-2 bg-oreo-cream/20 border border-oreo-cream/30 rounded-full px-4 py-1.5 text-oreo-cream text-xs font-bold uppercase tracking-widest mb-4">
             <Share2 size={12} /> Bagikan SweetMelt
@@ -120,36 +85,23 @@ export default function SharePage() {
           <div className="p-6 text-center">
             <p className="text-xs font-bold text-oreo-black/40 uppercase tracking-widest mb-5">Scan QR Code</p>
 
-            {/* QR dengan frame premium */}
             <div className="relative inline-block">
               <div className="bg-gradient-to-br from-oreo-black to-oreo-gray p-4 rounded-2xl shadow-xl">
-                <div className="bg-white p-3 rounded-xl">
-                  {mounted && (
-                    <QRCodeSVG
-                      ref={qrRef}
-                      value={SITE_URL}
-                      size={200}
-                      level="H"
-                      includeMargin={false}
-                      fgColor="#1a1a1a"
-                      bgColor="#ffffff"
-                      imageSettings={{
-                        src: "/favicon.ico",
-                        x: undefined,
-                        y: undefined,
-                        height: 36,
-                        width: 36,
-                        excavate: true,
-                      }}
-                    />
-                  )}
+                <div className="bg-white p-2 rounded-xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={QR_URL}
+                    alt="QR Code SweetMelt"
+                    width={220}
+                    height={220}
+                    className="rounded-lg"
+                  />
                 </div>
               </div>
-              {/* Glow effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-oreo-cream/30 to-lumer/20 rounded-2xl blur-lg -z-10" />
             </div>
 
-            <p className="text-xs text-oreo-black/40 mt-4 font-mono">{SITE_URL}</p>
+            <p className="text-xs text-oreo-black/40 mt-4 font-mono break-all">{SITE_URL}</p>
 
             <button
               onClick={handleDownloadQR}
@@ -187,12 +139,8 @@ export default function SharePage() {
 
           <div className="grid grid-cols-2 gap-3">
             {/* WhatsApp */}
-            <a
-              href={shareLinks.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 transition-all hover:scale-[1.02] active:scale-95 group"
-            >
+            <a href={shareLinks.whatsapp} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-2xl bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 transition-all hover:scale-[1.02] active:scale-95 group">
               <div className="w-10 h-10 bg-[#25D366] rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow flex-shrink-0">
                 <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -204,11 +152,9 @@ export default function SharePage() {
               </div>
             </a>
 
-            {/* Native Share / General */}
-            <button
-              onClick={handleNativeShare}
-              className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-300/30 hover:from-purple-500/20 hover:to-pink-500/20 transition-all hover:scale-[1.02] active:scale-95 group w-full text-left"
-            >
+            {/* Instagram (Native Share) */}
+            <button onClick={handleNativeShare}
+              className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-300/30 hover:from-purple-500/20 hover:to-pink-500/20 transition-all hover:scale-[1.02] active:scale-95 w-full text-left">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
                 style={{ background: "linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045)" }}>
                 <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
@@ -222,10 +168,8 @@ export default function SharePage() {
             </button>
 
             {/* TikTok */}
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10 hover:bg-black/10 transition-all hover:scale-[1.02] active:scale-95 group w-full text-left"
-            >
+            <button onClick={handleCopy}
+              className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10 hover:bg-black/10 transition-all hover:scale-[1.02] active:scale-95 w-full text-left">
               <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
                 <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
                   <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z"/>
@@ -238,12 +182,8 @@ export default function SharePage() {
             </button>
 
             {/* Twitter/X */}
-            <a
-              href={shareLinks.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10 hover:bg-black/10 transition-all hover:scale-[1.02] active:scale-95 group"
-            >
+            <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10 hover:bg-black/10 transition-all hover:scale-[1.02] active:scale-95">
               <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
                 <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.258 5.633L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
@@ -258,16 +198,14 @@ export default function SharePage() {
 
           <div className="mt-4 p-3 bg-oreo-cream/30 rounded-xl text-center">
             <p className="text-xs text-oreo-black/50 leading-relaxed italic">
-              💡 Untuk Instagram & TikTok, salin link dulu lalu tempel di bio atau caption story kamu!
+              💡 Untuk Instagram & TikTok, salin link lalu tempel di bio atau caption story kamu!
             </p>
           </div>
         </div>
 
-        {/* CTA back to menu */}
-        <a
-          href="/menu"
-          className="w-full py-4 rounded-2xl bg-oreo-black text-oreo-white font-bold text-center hover:bg-oreo-gray transition-all flex items-center justify-center gap-2 shadow-oreo hover:scale-[1.01] active:scale-95"
-        >
+        {/* CTA */}
+        <a href="/menu"
+          className="w-full py-4 rounded-2xl bg-oreo-black text-oreo-white font-bold text-center hover:bg-oreo-gray transition-all flex items-center justify-center gap-2 shadow-oreo hover:scale-[1.01] active:scale-95">
           🍪 Langsung Order Sekarang
         </a>
       </div>
