@@ -63,16 +63,22 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!productId) return;
-    supabase.from("products").select("*, categories(name, icon)").eq("id", productId).single()
-      .then(({ data: prod, error }) => {
+    (async () => {
+      try {
+        const { data: prod, error } = await supabase
+          .from("products")
+          .select("*, categories(name, icon)")
+          .eq("id", productId)
+          .single();
         if (!error && prod) {
           const sanitizedImg = sanitizeImageUrl(prod.image_url);
           setProduct(prod);
           setMainImage(sanitizedImg || localGallery[0] || "");
         }
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    })();
   }, [productId, localGallery]);
 
   useEffect(() => {
