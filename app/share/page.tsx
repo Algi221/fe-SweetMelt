@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
-import { Check, Copy, Download, Share2 } from "lucide-react";
+import { Check, Copy, Download, Share2, Instagram, Music2, Twitter, ArrowLeft } from "lucide-react";
+
+// Alias for X (Twitter) icon
+const XIcon = Twitter;
 
 const SITE_NAME = "SweetMelt";
 const SHARE_TEXT = "🍪 Cobain dessert premium SweetMelt! Silky Pudding & Oreo Cheese Cake yang lembut dan enak banget. Order sekarang yuk! 🍫";
