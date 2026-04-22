@@ -1,26 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Check, Copy, Download, Share2 } from "lucide-react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://fe-sweetmelt.vercel.app";
 const SITE_NAME = "SweetMelt";
 const SHARE_TEXT = "🍪 Cobain dessert premium SweetMelt! Silky Pudding & Oreo Cheese Cake yang lembut dan enak banget. Order sekarang yuk! 🍫";
 
-// QR Code via Google Charts API — zero dependency
-const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(SITE_URL)}&color=1a1a1a&bgcolor=ffffff&qzone=1&format=png`;
-const QR_DOWNLOAD_URL = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(SITE_URL)}&color=1a1a1a&bgcolor=ffffff&qzone=2&format=png`;
-
 export default function SharePage() {
   const [copied, setCopied] = useState(false);
+  // Dynamically get the current domain — works on localhost, Vercel, custom domain, etc.
+  const [siteUrl, setSiteUrl] = useState("");
+
+  useEffect(() => {
+    setSiteUrl(window.location.origin);
+  }, []);
+
+  const qrUrl = siteUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(siteUrl)}&color=1a1a1a&bgcolor=ffffff&qzone=1&format=png`
+    : "";
+  const qrDownloadUrl = siteUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(siteUrl)}&color=1a1a1a&bgcolor=ffffff&qzone=2&format=png`
+    : "";
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(SITE_URL);
+      await navigator.clipboard.writeText(siteUrl);
     } catch {
       const el = document.createElement("input");
-      el.value = SITE_URL;
+      el.value = siteUrl;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -31,7 +39,7 @@ export default function SharePage() {
   };
 
   const handleDownloadQR = async () => {
-    const response = await fetch(QR_DOWNLOAD_URL);
+    const response = await fetch(qrDownloadUrl);
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -42,14 +50,14 @@ export default function SharePage() {
   };
 
   const shareLinks = {
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(SHARE_TEXT + "\n\n" + SITE_URL)}`,
-    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(SITE_URL)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(SHARE_TEXT + "\n\n" + siteUrl)}`,
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_TEXT)}&url=${encodeURIComponent(siteUrl)}`,
   };
 
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: SITE_NAME, text: SHARE_TEXT, url: SITE_URL });
+        await navigator.share({ title: SITE_NAME, text: SHARE_TEXT, url: siteUrl });
       } catch { /* cancelled */ }
     } else {
       handleCopy();
@@ -90,7 +98,7 @@ export default function SharePage() {
                 <div className="bg-white p-2 rounded-xl">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={QR_URL}
+                    src={qrUrl}
                     alt="QR Code SweetMelt"
                     width={220}
                     height={220}
@@ -101,7 +109,7 @@ export default function SharePage() {
               <div className="absolute -inset-1 bg-gradient-to-r from-oreo-cream/30 to-lumer/20 rounded-2xl blur-lg -z-10" />
             </div>
 
-            <p className="text-xs text-oreo-black/40 mt-4 font-mono break-all">{SITE_URL}</p>
+            <p className="text-xs text-oreo-black/40 mt-4 font-mono break-all">{siteUrl}</p>
 
             <button
               onClick={handleDownloadQR}
@@ -117,7 +125,7 @@ export default function SharePage() {
           <p className="text-xs font-bold text-oreo-black/40 uppercase tracking-widest mb-4">Salin Link</p>
           <div className="flex gap-2">
             <div className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-mono text-sm text-oreo-black/70 truncate">
-              {SITE_URL}
+              {siteUrl}
             </div>
             <button
               onClick={handleCopy}
