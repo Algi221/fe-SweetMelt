@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, Share2 } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 
 export default function Navbar() {
@@ -49,6 +49,9 @@ export default function Navbar() {
               </Link>
               <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-semibold" : ""}`}>
                 Menu
+              </Link>
+              <Link href="/share" className={`${showDark ? "nav-link" : "nav-link-white"} flex items-center gap-1 ${pathname === "/share" ? "font-semibold" : ""}`}>
+                <Share2 size={13} /> Share
               </Link>
               <Link href="/admin/login" className={`${showDark ? "nav-link" : "nav-link-white"} opacity-40 hover:opacity-100 transition-opacity`}>
                 Admin
@@ -110,7 +113,13 @@ export default function Navbar() {
         {mobileOpen && (
           <div className="md:hidden glassmorphism-light mt-2 mx-4 rounded-2xl p-5 animate-fade-in border border-oreo-light shadow-oreo-lg">
             <div className="flex flex-col gap-4">
-              {[{ href: "/", label: "Beranda" }, { href: "/menu", label: "Menu" }, { href: "/#about", label: "Tentang Kami" }, { href: "/admin/login", label: "Admin" }].map((l) => (
+              {[
+                { href: "/", label: "Beranda" },
+                { href: "/menu", label: "Menu" },
+                { href: "/#about", label: "Tentang Kami" },
+                { href: "/share", label: "📲 Bagikan" },
+                { href: "/admin/login", label: "Admin" }
+              ].map((l) => (
                 <Link key={l.href} href={l.href} className="nav-link text-base border-b border-oreo-light pb-2 last:border-none" onClick={() => setMobileOpen(false)}>
                   {l.label}
                 </Link>
