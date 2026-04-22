@@ -6,7 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { CheckCircle, Clock, XCircle, ArrowLeft, Download, ExternalLink } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { supabase } from "@/lib/supabase";
 
 interface OrderItem {
   product_name: string;
@@ -22,8 +22,7 @@ interface Order {
   total_price: number;
   status: string;
   payment_method?: string;
-  duitku_reference?: string;
-  duitku_payment_url?: string;
+  payment_url?: string;
   created_at: string;
   order_items: OrderItem[];
 }
@@ -39,9 +38,13 @@ export default function OrderStatusPage() {
 
   const fetchOrder = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/orders/${id}`);
-      const data = await res.json();
-      if (data.data) setOrder(data.data);
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*, order_items(product_name, quantity, price_at_order)")
+        .eq("id", id)
+        .single();
+        
+      if (data) setOrder(data);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -83,18 +86,20 @@ export default function OrderStatusPage() {
   const shortId = order.id.split("-")[0].toUpperCase();
 
   return (
-    <main className="min-h-screen bg-oreo-white pb-16">
-      <Navbar />
+    <main className="min-h-screen bg-oreo-white pb-16 print:bg-white print:pb-0 print:min-h-0">
+      <div className="print:hidden">
+        <Navbar />
+      </div>
 
-      <div className="bg-oreo-black pt-28 pb-32 px-6 text-center">
+      <div className="bg-oreo-black pt-28 pb-32 px-6 text-center print:hidden">
         <h1 className="font-display text-3xl md:text-4xl font-bold text-oreo-white">
           Status <span className="text-oreo-cream italic">Pesanan</span>
         </h1>
       </div>
 
-      <div className="max-w-xl mx-auto px-6 -mt-20 relative z-10">
+      <div className="max-w-xl mx-auto px-6 -mt-20 relative z-10 print:mt-0 print:px-6 print:w-full print:max-w-none">
         {/* Receipt Ticket / Nota */}
-        <div className="bg-oreo-white rounded-t-3xl border border-oreo-light shadow-oreo-lg p-6 md:p-8 relative overflow-hidden">
+        <div className="bg-oreo-white rounded-t-3xl border border-oreo-light shadow-oreo-lg p-6 md:p-8 relative overflow-hidden print:shadow-none print:border-oreo-black/20 print:rounded-2xl print:border-2">
           
           {/* Header Status */}
           <div className="flex flex-col items-center justify-center text-center border-b-2 border-dashed border-oreo-light pb-6 mb-6">
@@ -173,14 +178,14 @@ export default function OrderStatusPage() {
         </div>
 
         {/* Squiggly bottom receipt border effect */}
-        <div className="h-4 bg-oreo-white border-x border-b border-oreo-light rounded-b-lg flex" style={{
+        <div className="h-4 bg-oreo-white border-x border-b border-oreo-light rounded-b-lg flex print:hidden" style={{
           backgroundImage: "radial-gradient(circle at 10px 10px, transparent 10px, #ffffff 11px)",
           backgroundSize: "20px 20px",
           backgroundPosition: "0 -10px"
         }} />
 
         {/* Action Buttons */}
-        <div className="mt-8 flex flex-col gap-3">
+        <div className="mt-8 flex flex-col gap-3 print:hidden">
           <div className="flex flex-col gap-3">
             {isPaid && (
               <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => window.print()}>
@@ -209,7 +214,7 @@ export default function OrderStatusPage() {
               <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" className="w-5 h-5 invert brightness-0" />
               Konfirmasi via WhatsApp
             </a>
-          {isPending && order.payment_method === "gateway" && (
+          {isPending && (order.payment_method === "gateway" || order.payment_method === "midtrans") && (
             <div className="flex flex-col gap-3 p-4 bg-oreo-cream/30 rounded-2xl border-2 border-dashed border-oreo-black/20 text-center animate-slide-up">
               <p className="text-sm font-bold text-oreo-black mb-1 flex items-center justify-center gap-2">
                 <span className="text-xl">💳</span> Siap Selesaikan Pembayaran?
@@ -217,18 +222,16 @@ export default function OrderStatusPage() {
               
               <button 
                 onClick={async () => {
-                  if (order.duitku_payment_url) {
-                    window.location.href = order.duitku_payment_url;
+                  if (order.payment_url) {
+                    window.location.href = order.payment_url;
                     return;
                   }
                   try {
-                    const res = await fetch(`${API_URL}/api/payment/create`, {
-                      method: "POST", headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ order_id: order.id }),
+                    const { data, error } = await supabase.functions.invoke("create-payment", {
+                      body: { order_id: order.id }
                     });
-                    const data = await res.json();
-                    if (data.paymentUrl) window.location.href = data.paymentUrl;
-                    else alert("Gagal memproses pembayaran. Silakan hubungi admin.");
+                    if (data?.paymentUrl) window.location.href = data.paymentUrl;
+                    else alert("Gagal memproses pembayaran: " + (error?.message || "Silakan hubungi admin."));
                   } catch (e) { alert("Terjadi kesalahan."); }
                 }}
                 className="w-full py-4 rounded-xl bg-oreo-black text-oreo-white font-bold text-lg hover:bg-oreo-gray transition-all shadow-lg flex items-center justify-center gap-2"
@@ -245,11 +248,8 @@ export default function OrderStatusPage() {
                 onClick={async () => {
                   if (confirm("Simulasi pembayaran berhasil? (Hanya untuk testing)")) {
                     try {
-                      const res = await fetch(`${API_URL}/api/payment/simulate-success`, {
-                        method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ order_id: order.id }),
-                      });
-                      if (res.ok) window.location.reload();
+                      const { error } = await supabase.from("orders").update({ status: "paid" }).eq("id", order.id);
+                      if (!error) window.location.reload();
                       else alert("Gagal simulasi.");
                     } catch (e) { alert("Terjadi kesalahan."); }
                   }
@@ -262,7 +262,7 @@ export default function OrderStatusPage() {
           )}
        </div>
 
-          {isPending && order.duitku_reference && (
+          {isPending && order.payment_method === "gateway" && (
              <p className="text-center text-sm text-oreo-black/50 my-2">
                Halaman ini akan otomatis refresh jika Anda sudah bayar.
              </p>

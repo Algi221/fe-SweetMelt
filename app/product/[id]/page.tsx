@@ -8,7 +8,7 @@ import { ArrowLeft, ShoppingCart, Plus, Minus, Star, ShieldCheck, Truck, Sparkle
 import { useCart } from "@/lib/cartStore";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { supabase } from "@/lib/supabase";
 
 interface Product {
   id: string;
@@ -63,14 +63,11 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!productId) return;
-    fetch(`${API_URL}/api/products/${productId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        const prod = data.data;
-        if (prod) {
+    supabase.from("products").select("*, categories(name, icon)").eq("id", productId).single()
+      .then(({ data: prod, error }) => {
+        if (!error && prod) {
           const sanitizedImg = sanitizeImageUrl(prod.image_url);
           setProduct(prod);
-          // Set main image to the first one that exists
           setMainImage(sanitizedImg || localGallery[0] || "");
         }
         setLoading(false);

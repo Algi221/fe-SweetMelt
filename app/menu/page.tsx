@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { Search } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { supabase } from "@/lib/supabase";
 
 interface Category { id: string; name: string; slug: string; icon: string; }
 interface Product { id: string; name: string; description: string; price: number; image_url: string; categories?: { name: string; icon: string; slug: string }; }
@@ -19,20 +19,31 @@ export default function MenuPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/api/categories`).then((r) => r.json()),
-      fetch(`${API_URL}/api/products`).then((r) => r.json()),
-    ]).then(([catData, prodData]) => {
-      setCategories(catData.data || []);
-      setProducts(prodData.data || []);
+      supabase.from("categories").select("*"),
+      supabase.from("products").select("*, categories(name, icon, slug)")
+    ]).then(([catRes, prodRes]) => {
+      setCategories(catRes.data || []);
+      setProducts(prodRes.data || []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     if (loading) return;
-    const url = activeCategory === "all" ? `${API_URL}/api/products` : `${API_URL}/api/products?category=${activeCategory}`;
     setLoading(true);
-    fetch(url).then((r) => r.json()).then((data) => { setProducts(data.data || []); setLoading(false); });
+    
+    const fetchFiltered = async () => {
+      let query = supabase.from("products").select("*, categories(name, icon, slug)");
+      if (activeCategory !== "all") {
+        const { data: cat } = await supabase.from("categories").select("id").eq("slug", activeCategory).single();
+        if (cat) query = query.eq("category_id", cat.id);
+      }
+      const { data } = await query;
+      setProducts(data || []);
+      setLoading(false);
+    };
+    
+    fetchFiltered();
   }, [activeCategory]);
 
   const filtered = products.filter((p) =>

@@ -26,7 +26,7 @@ import {
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { supabase } from "@/lib/supabase";
 
 interface OrderItem {
   product_name: string;
@@ -82,9 +82,9 @@ export default function AdminDashboard() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/api/orders`);
-      const data = await res.json();
-      if (data.data) setOrders(data.data);
+      const { data, error } = await supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+      if (data) setOrders(data as any[]);
+      if (error) throw error;
     } catch (e) {
       toast.error("Failed to load orders");
     } finally {
@@ -94,14 +94,12 @@ export default function AdminDashboard() {
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
+      const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+      if (!error) {
         toast.success(`Status updated: ${newStatus.toUpperCase()}`);
         fetchOrders();
+      } else {
+        throw error;
       }
     } catch (e) {
       toast.error("Status update failed");

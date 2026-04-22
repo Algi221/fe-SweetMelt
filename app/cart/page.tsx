@@ -8,7 +8,7 @@ import { useCart } from "@/lib/cartStore";
 import { Trash2, Plus, Minus, ShoppingBag, CheckCircle, Phone, ChevronRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { supabase } from "@/lib/supabase";
 
 const formatPrice = (p: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(p);
@@ -36,7 +36,7 @@ export default function CartPage() {
   const pickupLocation = "Di antar ke rumah";
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  const [paymentMethod, setPaymentMethod] = useState("gateway"); // "gateway" or "cash"
+  const [paymentMethod, setPaymentMethod] = useState("midtrans"); // "midtrans" or "cash"
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -60,9 +60,8 @@ export default function CartPage() {
       const mapsUrl = `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
       const finalAddress = `${form.address} \n\nMaps: ${mapsUrl}`;
 
-      const orderRes = await fetch(`${API_URL}/api/orders`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // 1. Simpan Order ke Supabase
+      const { data: orderData, error: orderErr } = await supabase.from('orders').insert({
           customer_name: form.name, 
           customer_phone: form.phone, 
           customer_address: finalAddress, 
@@ -70,32 +69,45 @@ export default function CartPage() {
           pickup_location: pickupLocation,
           payment_method: paymentMethod,
           notes: form.notes,
-          items: items.map((i) => ({ product_id: i.id, quantity: i.quantity, variant: i.variant })),
-        }),
-      });
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.error || "Gagal membuat order");
+          total_price: subtotal,
+          status: 'pending'
+      }).select().single();
+
+      if (orderErr || !orderData) throw new Error(orderErr?.message || "Gagal membuat order");
       
-      const orderId = orderData.data.id;
-      
+      const orderId = orderData.id;
+
+      // 2. Simpan Order Items ke Supabase
+      const orderItems = items.map((i) => ({
+        order_id: orderId,
+        product_id: i.id,
+        product_name: i.variant ? `${i.name} (${i.variant})` : i.name,
+        quantity: i.quantity,
+        price_at_order: i.price
+      }));
+
+      const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
+      if (itemsErr) throw new Error("Gagal menyimpan item pesanan");
+
       clearCart();
 
-      // If Cash, just go to order page. If Gateway, create payment.
+      // If Cash, just go to order page.
       if (paymentMethod === "cash") {
         router.push(`/order/${orderId}`);
         return;
       }
 
-      const payRes = await fetch(`${API_URL}/api/payment/create`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id: orderId }),
+      // 3. Panggil Edge Function untuk Midtrans Payment URL
+      const { data: payData, error: payErr } = await supabase.functions.invoke('create-payment', {
+        body: { order_id: orderId }
       });
-      const payData = await payRes.json();
       
-      if (!payRes.ok || !payData.paymentUrl) { 
+      if (payErr || !payData?.paymentUrl) { 
         router.push(`/order/${orderId}`); 
         return; 
       }
+      
+      // Auto redirect ke web payment midtrans
       window.location.href = payData.paymentUrl;
     } catch (e: any) { setError(e.message || "Terjadi kesalahan, coba lagi."); }
     finally { setSubmitting(false); }
