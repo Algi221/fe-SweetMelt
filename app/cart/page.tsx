@@ -99,7 +99,10 @@ export default function CartPage() {
 
       // 3. Panggil Edge Function untuk Midtrans Payment URL
       const { data: payData, error: payErr } = await supabase.functions.invoke('create-payment', {
-        body: { order_id: orderId }
+        body: { 
+          order_id: orderId,
+          frontend_url: window.location.origin // Dynamic URL for redirects
+        }
       });
       
       if (payErr || !payData?.paymentUrl) { 
