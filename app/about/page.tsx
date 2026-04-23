@@ -1,123 +1,153 @@
+"use client";
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Heart, Star, Sparkles, Coffee } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart, Users, Sparkles, Rocket, MessageCircle, ShieldAlert } from 'lucide-react';
 
-export const metadata = {
-  title: 'Tentang Kami - SweetMelt',
-  description: 'Kisah dibalik kelezatan donet lumer premium SweetMelt.',
-};
+const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default function AboutPage() {
   return (
-    <main className="bg-oreo-white min-h-screen">
+    <main className="bg-white min-h-screen font-sans selection:bg-lumer selection:text-oreo-black overflow-x-hidden">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-oreo-black relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-lumer/10 rounded-full -mr-48 -mt-48 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-lumer/5 rounded-full -ml-48 -mb-48 blur-3xl" />
-        
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
-          <h1 className="font-display text-5xl md:text-7xl text-oreo-white mb-6">
-            Cerita <span className="text-lumer">Manis</span> Kami
+      {/* Title / Hero - Zero Images, Pure Typography */}
+      <section className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
+        <Reveal>
+          <div className="inline-block bg-lumer/10 text-lumer px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+            Behind the Melt
+          </div>
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-display text-oreo-black tracking-tighter leading-[0.85] mb-12">
+            Sebuah Cerita <br />
+            Tentang <span className="text-lumer italic">Perjalanan.</span>
           </h1>
-          <p className="text-oreo-white/60 text-lg max-w-2xl mx-auto leading-relaxed">
-            Lebih dari sekadar donat. SweetMelt adalah perwujudan dari cinta, eksperimen rasa, dan keinginan untuk menghadirkan kebahagiaan di setiap gigitan.
-          </p>
-        </div>
-      </section>
-
-      {/* Philosophy Section */}
-      <section className="py-24 max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div className="relative">
-            <div className="aspect-square rounded-[40px] bg-oreo-cream overflow-hidden shadow-2xl relative z-10">
-               <img 
-                 src="https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&q=80&w=800" 
-                 alt="Chef SweetMelt" 
-                 className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-700"
-               />
-            </div>
-            <div className="absolute -bottom-6 -right-6 w-full h-full border-4 border-lumer rounded-[40px] z-0" />
-          </div>
-          
-          <div className="space-y-8">
-            <div className="inline-block bg-lumer/10 text-lumer px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest">
-              Filosofi Kami
-            </div>
-            <h2 className="section-title text-left">Dibuat Dengan <span className="text-lumer">Hati</span>, Disajikan Dengan Cinta</h2>
-            <p className="text-oreo-black/60 leading-relaxed">
-              Didirikan pada tahun 2023, SweetMelt lahir dari dapur kecil dengan satu misi sederhana: menciptakan donat dengan tekstur paling lembut yang pernah ada. Kami percaya bahwa kualitas tidak bisa dikompromi.
-            </p>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="p-4 bg-oreo-cream/50 rounded-2xl border border-oreo-light">
-                <Heart className="text-lumer mb-3" size={24} />
-                <h4 className="font-bold text-sm mb-1">Bahan Premium</h4>
-                <p className="text-xs text-oreo-black/50">Cokelat asli dan tepung kualitas terbaik.</p>
-              </div>
-              <div className="p-4 bg-oreo-cream/50 rounded-2xl border border-oreo-light">
-                <Sparkles className="text-lumer mb-3" size={24} />
-                <h4 className="font-bold text-sm mb-1">Fresh Every Day</h4>
-                <p className="text-xs text-oreo-black/50">Selalu baru, tidak ada stok sisa kemarin.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-20 bg-oreo-cream">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
-            <div>
-              <div className="text-4xl md:text-5xl font-display text-oreo-black mb-2">50k+</div>
-              <div className="text-xs uppercase tracking-widest font-bold text-oreo-black/40">Donat Terjual</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-display text-oreo-black mb-2">12k</div>
-              <div className="text-xs uppercase tracking-widest font-bold text-oreo-black/40">Pelanggan Puas</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-display text-oreo-black mb-2">15</div>
-              <div className="text-xs uppercase tracking-widest font-bold text-oreo-black/40">Varian Rasa</div>
-            </div>
-            <div>
-              <div className="text-4xl md:text-5xl font-display text-oreo-black mb-2">4.9</div>
-              <div className="text-xs uppercase tracking-widest font-bold text-oreo-black/40">Rating Rata-rata</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Vision Mission */}
-      <section className="py-24 max-w-5xl mx-auto px-6 text-center">
-        <div className="mb-16">
-          <h2 className="section-title">Visi & <span className="text-lumer">Misi</span></h2>
-        </div>
+        </Reveal>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="p-10 bg-oreo-white border border-oreo-light rounded-[32px] shadow-oreo hover:-translate-y-2 transition-transform duration-500">
-            <div className="w-14 h-14 bg-lumer/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Star className="text-lumer" size={28} />
-            </div>
-            <h3 className="text-xl font-display text-oreo-black mb-4">Visi Kami</h3>
-            <p className="text-oreo-black/60 text-sm leading-relaxed">
-              Menjadi brand donat lumer nomor satu di Indonesia yang dikenal karena kualitas premium dan inovasi rasa yang tak terbatas.
+        <Reveal delay={0.2}>
+          <div className="max-w-2xl">
+            <p className="text-xl md:text-2xl text-oreo-black/60 leading-relaxed font-medium">
+              Ini bukan cuma soal jualan makanan. Ini soal gimana kami bertahan di tengah badai ego dan kerusuhan.
             </p>
           </div>
+        </Reveal>
+      </section>
+
+      {/* The Story Section */}
+      <section className="py-24 px-6 bg-oreo-black text-white relative">
+        {/* Subtle Decorative Elements */}
+        <div className="absolute top-20 right-10 w-64 h-64 bg-lumer/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 left-10 w-96 h-96 bg-white/5 rounded-full blur-[120px]" />
+
+        <div className="max-w-4xl mx-auto space-y-24 relative z-10">
           
-          <div className="p-10 bg-oreo-white border border-oreo-light rounded-[32px] shadow-oreo hover:-translate-y-2 transition-transform duration-500">
-            <div className="w-14 h-14 bg-lumer/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Coffee className="text-lumer" size={28} />
+          <Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+              <div className="md:col-span-4">
+                <span className="text-lumer font-black text-sm uppercase tracking-widest">Awal Mula</span>
+              </div>
+              <div className="md:col-span-8">
+                <p className="text-xl md:text-2xl leading-relaxed text-white/80">
+                  Semuanya berawal dari tugas sekolah. Kami, sekumpulan siswa dari kelas <span className="text-white font-bold underline decoration-lumer decoration-4 underline-offset-8">XI RPL 1</span>, ditantang buat bikin produk yang bisa dijual dan dipasarkan. 
+                  Awalnya ya cuma ngejar nilai, tapi ternyata dinamikanya jauh lebih dalem dari itu.
+                </p>
+              </div>
             </div>
-            <h3 className="text-xl font-display text-oreo-black mb-4">Misi Kami</h3>
-            <p className="text-oreo-black/60 text-sm leading-relaxed">
-              Terus berinovasi menciptakan kebahagiaan melalui donat yang dibuat dari bahan-bahan organik dan pelayanan yang ramah sepenuh hati.
-            </p>
-          </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+              <div className="md:col-span-4">
+                <span className="text-rose-400 font-black text-sm uppercase tracking-widest">Chaos & Ego</span>
+              </div>
+              <div className="md:col-span-8">
+                <p className="text-xl md:text-2xl leading-relaxed text-white/80">
+                  Jujur aja, pas pengerjaannya tuh nggak se-sweet namanya. Banyak banget <span className="italic text-rose-300">miss comm</span>, kerusuhan kecil, sampe perbedaan pendapat yang bikin tensi naik. 
+                  Ada masa-masa di mana ego kami masing-masing lebih dominan, bahkan sampe hampir ngalamin perpecahan. Ada yang ngerasa paling bener, ada yang ngerasa nggak didenger. Chaos banget pokoknya.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+              <div className="md:col-span-4">
+                <span className="text-emerald-400 font-black text-sm uppercase tracking-widest">Persistence</span>
+              </div>
+              <div className="md:col-span-8">
+                <p className="text-xl md:text-2xl leading-relaxed text-white/80">
+                  Tapi di tengah semua perpecahan itu, ada satu hal yang bikin kami sadar: <span className="text-lumer font-bold">SweetMelt terlalu berharga buat dilepas.</span> Kami milih buat tetep bareng, ngeredam ego, dan mutusin buat pertahanin brand ini sampai sekarang. SweetMelt jadi bukti kalau kerusuhan nggak selalu berakhir dengan perpisahan.
+                </p>
+              </div>
+            </div>
+          </Reveal>
         </div>
+      </section>
+
+      {/* The Lesson Section */}
+      <section className="py-32 px-6 max-w-7xl mx-auto">
+        <Reveal>
+          <div className="text-center mb-24">
+             <h2 className="text-4xl md:text-6xl font-display text-oreo-black tracking-tight">Pelajaran Untuk <span className="text-lumer">Kita Semua</span></h2>
+          </div>
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {[
+            {
+              icon: MessageCircle,
+              title: "Komunikasi Itu Kunci",
+              text: "Miss comm itu wajar, tapi nggak boleh dibiarin lama. Ngobrol, dengerin, baru ambil keputusan bareng."
+            },
+            {
+              icon: ShieldAlert,
+              title: "Turunkan Ego",
+              text: "Bangun sesuatu yang besar nggak bisa sendirian. Kadang kita harus ngalah demi keutuhan tim."
+            },
+            {
+              icon: Rocket,
+              title: "Konsistensi",
+              text: "Masalah pasti ada, tapi sejauh mana kita mau bertahan? Itu yang nentuin hasil akhirnya."
+            }
+          ].map((item, i) => (
+            <Reveal key={i} delay={i * 0.1}>
+              <div className="p-10 bg-white border border-slate-100 rounded-[40px] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group">
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-lumer group-hover:text-white transition-colors">
+                  <item.icon size={32} strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-bold text-oreo-black mb-4">{item.title}</h3>
+                <p className="text-oreo-black/50 leading-relaxed text-sm">
+                  {item.text}
+                </p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Final Quote */}
+      <section className="py-24 px-6 text-center border-t border-slate-50 italic-none">
+        <Reveal>
+          <p className="text-oreo-black/40 text-xs font-black uppercase tracking-[0.4em] mb-10">SweetMelt Journey</p>
+          <blockquote className="text-2xl md:text-5xl font-display text-oreo-black max-w-4xl mx-auto leading-tight tracking-tight">
+            "Karena kelezatan sejati lahir dari perjuangan yang sungguh-sungguh, bahkan di tengah <span className="text-lumer">perbedaan.</span>"
+          </blockquote>
+          <div className="mt-12 flex items-center justify-center gap-4">
+             <div className="w-12 h-[1px] bg-slate-200" />
+             <p className="text-oreo-black font-bold text-sm">XI RPL 1 Creative Team</p>
+             <div className="w-12 h-[1px] bg-slate-200" />
+          </div>
+        </Reveal>
       </section>
 
       <Footer />

@@ -92,7 +92,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-oreo-light flex flex-col md:flex-row items-center justify-between gap-6">
         <p className="text-oreo-black/30 text-xs flex items-center gap-1">
-          © {new Date().getFullYear()} SweetMelt. Made with <Heart size={12} className="text-red-400 fill-red-400" /> for dessert lovers.
+          © {new Date().getFullYear()} SweetMelt. Developed by <Link href="https://github.com/Algi221" className="text-oreo-black/60 hover:text-lumer font-medium transition-colors text-sm">Algi</Link>
         </p>
         <div className="flex items-center gap-6">
           <Link href="/" className="text-oreo-black/30 hover:text-oreo-black text-xs transition-colors">Privacy Policy</Link>
