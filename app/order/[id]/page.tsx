@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { CheckCircle, Clock, XCircle, ArrowLeft, Download, ExternalLink } from "lucide-react";
+import { CheckCircle, Clock, XCircle, ArrowLeft, Download, Printer, ExternalLink } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
 
@@ -32,7 +32,10 @@ const formatPrice = (p: number) =>
 
 export default function OrderStatusPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const action = searchParams.get("action");
+  
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +47,15 @@ export default function OrderStatusPage() {
         .eq("id", id)
         .single();
         
-      if (data) setOrder(data);
+      if (data) {
+        setOrder(data);
+        // If status is paid and action is print, trigger print
+        if ((data.status === 'paid' || data.status === 'success') && action === 'print') {
+          setTimeout(() => {
+            window.print();
+          }, 1000);
+        }
+      }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -54,7 +65,7 @@ export default function OrderStatusPage() {
     fetchOrder();
     const t = setInterval(fetchOrder, 5000); // auto-poll every 5s
     return () => clearInterval(t);
-  }, [id]);
+  }, [id, action]);
 
   if (loading) {
     return (
@@ -215,7 +226,7 @@ export default function OrderStatusPage() {
           <div className="flex flex-col gap-3">
             {isPaid && (
               <button className="btn-primary w-full flex items-center justify-center gap-2" onClick={() => window.print()}>
-                <Download size={18} /> Simpan / Cetak Nota
+                <Printer size={18} /> Simpan / Cetak Nota
               </button>
             )}
             
@@ -277,9 +288,25 @@ export default function OrderStatusPage() {
                 onClick={async () => {
                   if (confirm("Simulasi pembayaran berhasil? (Hanya untuk testing)")) {
                     try {
+                      // 1. Update Supabase
                       const { error } = await supabase.from("orders").update({ status: "paid" }).eq("id", order.id);
-                      if (!error) window.location.reload();
-                      else alert("Gagal simulasi.");
+                      
+                      if (!error) {
+                        // 2. Update Local Storage for History synchronization
+                        const savedOrders = localStorage.getItem("sweetmelt_recent_orders");
+                        if (savedOrders) {
+                          const parsedOrders = JSON.parse(savedOrders);
+                          const updatedOrders = parsedOrders.map((o: any) => 
+                            o.id === order.id ? { ...o, status: 'paid' } : o
+                          );
+                          localStorage.setItem("sweetmelt_recent_orders", JSON.stringify(updatedOrders));
+                        }
+                        
+                        // 3. Reload Page
+                        window.location.reload();
+                      } else {
+                        alert("Gagal simulasi.");
+                      }
                     } catch (e) { alert("Terjadi kesalahan."); }
                   }
                 }}

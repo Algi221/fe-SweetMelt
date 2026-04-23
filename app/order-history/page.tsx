@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 import { 
   History, 
   Package, 
@@ -14,7 +16,10 @@ import {
   Phone, 
   User,
   ShoppingBag,
-  ArrowRight
+  ArrowRight,
+  CheckCircle,
+  Printer,
+  Download
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,6 +37,7 @@ interface Order {
   items: OrderItem[];
   total: number;
   date: string;
+  status: string;
   customer: {
     name: string;
     phone: string;
@@ -44,14 +50,42 @@ export default function OrderHistoryPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchLiveStatuses = async (localOrders: Order[]) => {
+    try {
+      const orderIds = localOrders.map(o => o.id);
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id, status')
+        .in('id', orderIds);
+
+      if (data && !error) {
+        const updatedOrders = localOrders.map(lo => {
+          const live = data.find(d => d.id === lo.id);
+          return live ? { ...lo, status: live.status } : lo;
+        });
+        setOrders(updatedOrders);
+        localStorage.setItem("sweetmelt_recent_orders", JSON.stringify(updatedOrders));
+        
+        // Update selected order if it exists
+        if (selectedOrder) {
+          const updatedSelected = updatedOrders.find(o => o.id === selectedOrder.id);
+          if (updatedSelected) setSelectedOrder(updatedSelected);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch live statuses", e);
+    }
+  };
+
   useEffect(() => {
-    // Load from localStorage as requested
     const savedOrders = localStorage.getItem("sweetmelt_recent_orders");
     if (savedOrders) {
       const parsedOrders = JSON.parse(savedOrders);
       setOrders(parsedOrders);
       if (parsedOrders.length > 0) {
         setSelectedOrder(parsedOrders[0]);
+        // Trigger live refresh
+        fetchLiveStatuses(parsedOrders);
       }
     }
     setIsLoading(false);
@@ -134,9 +168,18 @@ export default function OrderHistoryPage() {
                       <ChevronRight size={16} className={selectedOrder?.id === order.id ? "text-lumer" : "text-oreo-black/20"} />
                     </div>
                     <div className="flex justify-between items-end">
-                      <p className={`text-[10px] flex items-center gap-1 ${selectedOrder?.id === order.id ? "text-oreo-white/50" : "text-oreo-black/40"}`}>
-                        <Calendar size={12} /> {formatDate(order.date)}
-                      </p>
+                      <div className="flex flex-col gap-1">
+                        <p className={`text-[10px] flex items-center gap-1 ${selectedOrder?.id === order.id ? "text-oreo-white/50" : "text-oreo-black/40"}`}>
+                          <Calendar size={12} /> {formatDate(order.date)}
+                        </p>
+                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-md w-fit ${
+                          (order.status === 'paid' || order.status === 'success') 
+                            ? 'bg-green-500/20 text-green-500' 
+                            : 'bg-orange-500/20 text-orange-500'
+                        }`}>
+                          {order.status || 'Pending'}
+                        </span>
+                      </div>
                       <p className={`font-bold ${selectedOrder?.id === order.id ? "text-lumer" : "text-oreo-black"}`}>
                         Rp {order.total.toLocaleString()}
                       </p>
@@ -249,9 +292,47 @@ export default function OrderHistoryPage() {
                           </div>
                        </div>
 
-                       <div className="flex items-center justify-center gap-4 py-4 text-oreo-black/20">
-                          <Clock size={16} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Terima kasih atas pesananmu!</span>
+                       <div className="flex flex-col gap-3 py-4">
+                          {(selectedOrder.status === 'paid' || selectedOrder.status === 'success') ? (
+                            <div className="space-y-3">
+                              <div className="bg-green-50 border border-green-100 p-4 rounded-2xl flex items-center gap-3">
+                                <CheckCircle className="text-green-500" size={20} />
+                                <div>
+                                  <p className="text-green-800 font-bold text-sm">Pembayaran Lunas</p>
+                                  <p className="text-green-600 text-[10px]">Silakan simpan atau cetak nota ini.</p>
+                                </div>
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  // Navigate to the dedicated order page and trigger print there for best formatting
+                                  window.location.href = `/order/${selectedOrder.id}?action=print`;
+                                }}
+                                className="w-full py-3 bg-oreo-black text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-oreo-gray transition-all shadow-lg"
+                              >
+                                <Printer size={18} /> Cetak Nota Pesanan
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <div className="bg-orange-50 border border-orange-100 p-4 rounded-2xl flex items-center gap-3">
+                                <Clock className="text-orange-500 animate-pulse" size={20} />
+                                <div>
+                                  <p className="text-orange-800 font-bold text-sm">Menunggu Pembayaran</p>
+                                  <p className="text-orange-600 text-[10px]">Pesanan belum bisa kami proses.</p>
+                                </div>
+                              </div>
+                              <Link 
+                                href={`/order/${selectedOrder.id}`}
+                                className="w-full py-3 bg-lumer text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-lumer/90 transition-all shadow-lg"
+                              >
+                                <CreditCard size={18} /> Bayar Sekarang <ArrowRight size={16} />
+                              </Link>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-center gap-4 py-4 text-oreo-black/10">
+                             <span className="text-[9px] font-black uppercase tracking-widest">— SweetMelt Premium Dessert —</span>
+                          </div>
                        </div>
                     </div>
                   </motion.div>

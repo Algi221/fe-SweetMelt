@@ -95,6 +95,7 @@ export default function CartPage() {
         items: [...items],
         total: subtotal,
         date: new Date().toISOString(),
+        status: 'pending',
         customer: { name: form.name, phone: form.phone, address: form.address }
       };
       const prevOrders = JSON.parse(localStorage.getItem("sweetmelt_recent_orders") || "[]");
