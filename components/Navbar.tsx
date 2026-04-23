@@ -53,9 +53,6 @@ export default function Navbar() {
               <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-semibold" : ""}`}>
                 Pesanan
               </Link>
-              <Link href="/#comments" className={showDark ? "nav-link" : "nav-link-white"}>
-                Live Chat
-              </Link>
               <Link href="/share" className={`${showDark ? "nav-link" : "nav-link-white"} flex items-center gap-1 ${pathname === "/share" ? "font-semibold" : ""}`}>
                 <Share2 size={13} /> Share
               </Link>
@@ -82,7 +79,7 @@ export default function Navbar() {
 
             {/* Right items */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/#about" className={showDark ? "nav-link" : "nav-link-white"}>
+              <Link href="/about" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/about" ? "font-semibold text-lumer" : ""}`}>
                 Tentang Kami
               </Link>
               <Link
@@ -122,9 +119,8 @@ export default function Navbar() {
               {[
                 { href: "/", label: "Beranda" },
                 { href: "/menu", label: "Menu" },
-                { href: "/order-history", label: "Riwayat Pesanan" },
-                { href: "/#comments", label: "Live Chat" },
-                { href: "/#about", label: "Tentang Kami" },
+                { href: "/order-history", label: "Pesanan" },
+                { href: "/about", label: "Tentang Kami" },
                 { href: "/share", label: "📲 Bagikan" },
                 { href: "/admin/login", label: "Admin" }
               ].map((l) => (

@@ -89,7 +89,17 @@ export default function CartPage() {
       const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
       if (itemsErr) throw new Error("Gagal menyimpan item pesanan");
 
-      // Save phone number for history lookup
+      // Save full order to localStorage for fast local history
+      const orderToStore = {
+        id: orderId,
+        items: [...items],
+        total: subtotal,
+        date: new Date().toISOString(),
+        customer: { name: form.name, phone: form.phone, address: form.address }
+      };
+      const prevOrders = JSON.parse(localStorage.getItem("sweetmelt_recent_orders") || "[]");
+      localStorage.setItem("sweetmelt_recent_orders", JSON.stringify([orderToStore, ...prevOrders]));
+
       localStorage.setItem("sweetmelt_customer_phone", form.phone);
       localStorage.setItem("sweetmelt_customer_name", form.name);
 
