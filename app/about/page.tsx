@@ -30,7 +30,7 @@ export default function AboutPage() {
           </div>
           <h1 className="text-6xl md:text-8xl lg:text-9xl font-display text-oreo-black tracking-tighter leading-[0.85] mb-12">
             Sebuah Cerita <br />
-            Tentang <span className="text-lumer italic">Perjalanan.</span>
+            Tentang Perjalanan <span className="text-lumer italic">SweetMelt.</span>
           </h1>
         </Reveal>
         

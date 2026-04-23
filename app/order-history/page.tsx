@@ -79,9 +79,8 @@ export default function OrderHistoryPage() {
             </h1>
             <p className="text-oreo-black/50 text-sm">Cek riwayat kebahagiaan manismu di sini.</p>
           </div>
-          <div className="bg-lumer/10 px-4 py-2 rounded-full border border-lumer/20 text-[10px] uppercase tracking-widest font-bold text-lumer">
-            Local Storage Mode
-          </div>
+          <div />
+
         </div>
 
         {isLoading ? (
