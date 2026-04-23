@@ -44,11 +44,11 @@ export default function Navbar() {
 
   const menuLinks = [
     { href: "/", label: "Beranda" },
-    { href: "/menu", label: "Menu Donat" },
-    { href: "/order-history", label: "Riwayat Pesanan" },
-    { href: "/about", label: "Tentang Kami" },
-    { href: "/share", label: "Bagikan Kebahagiaan" },
-    { href: "/admin/login", label: "Portal Admin" }
+    { href: "/menu", label: "Menu" },
+    { href: "/order-history", label: "Pesanan" },
+    { href: "/about", label: "Tentang" },
+    { href: "/share", label: "Bagikan" },
+    { href: "/admin/login", label: "Dashboard Admin" }
   ];
 
   return (
@@ -162,25 +162,33 @@ export default function Navbar() {
                </button>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center items-center gap-8 relative z-10">
-               {menuLinks.map((link, idx) => (
-                 <motion.div
-                   key={link.href}
-                   initial={{ opacity: 0, y: 20 }}
-                   animate={{ opacity: 1, y: 0 }}
-                   transition={{ delay: 0.1 + idx * 0.05 }}
-                 >
-                   <Link 
-                     href={link.href} 
-                     onClick={() => setMobileOpen(false)}
-                     className={`text-3xl font-display font-bold transition-all tracking-tight ${
-                       pathname === link.href ? "text-lumer scale-110" : "text-oreo-white/60 hover:text-oreo-white"
-                     }`}
+            <div className="flex-1 flex flex-col justify-center items-start gap-10 relative z-10 pl-4">
+               {menuLinks.map((link, idx) => {
+                 const isAdmin = link.href.includes('admin');
+                 return (
+                   <motion.div
+                     key={link.href}
+                     initial={{ opacity: 0, x: -20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     transition={{ delay: 0.1 + idx * 0.05 }}
                    >
-                     {link.label}
-                   </Link>
-                 </motion.div>
-               ))}
+                     <Link 
+                       href={link.href} 
+                       onClick={() => setMobileOpen(false)}
+                       className={`font-display font-bold transition-all tracking-tight ${
+                         pathname === link.href 
+                           ? "text-lumer text-4xl" 
+                           : isAdmin 
+                             ? "text-lg text-oreo-white/20 hover:text-oreo-white/40 mt-4" 
+                             : "text-3xl text-oreo-white/60 hover:text-oreo-white"
+                       }`}
+                     >
+                       {link.label}
+                       {isAdmin && <span className="text-[10px] ml-2 opacity-50 font-sans tracking-widest border border-white/10 px-2 py-0.5 rounded-md uppercase">Private</span>}
+                     </Link>
+                   </motion.div>
+                 );
+               })}
             </div>
 
             <div className="mt-auto space-y-4 relative z-10">
