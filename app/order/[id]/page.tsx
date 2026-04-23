@@ -82,8 +82,15 @@ export default function OrderStatusPage() {
   }
 
   const isPaid = order.status.toLowerCase() === "paid" || order.status.toLowerCase() === "success";
-  const isPending = order.status.toLowerCase() === "pending";
+  const isPending = order.status.toLowerCase() === "pending" || order.status.toLowerCase() === "unpaid";
+  const isFailed = order.status.toLowerCase() === "failed" || order.status.toLowerCase() === "error";
   const shortId = order.id.split("-")[0].toUpperCase();
+
+  // Dynamic Styles
+  const statusColor = isPaid ? "bg-green-500" : isPending ? "bg-orange-500" : "bg-red-500";
+  const statusLightColor = isPaid ? "bg-green-50" : isPending ? "bg-orange-50" : "bg-red-50";
+  const statusBorderColor = isPaid ? "border-green-200" : isPending ? "border-orange-200" : "border-red-200";
+  const statusTextColor = isPaid ? "text-green-700" : isPending ? "text-orange-700" : "text-red-700";
 
   return (
     <main className="min-h-screen bg-oreo-white pb-16 print:bg-white print:pb-0 print:min-h-0">
@@ -91,10 +98,13 @@ export default function OrderStatusPage() {
         <Navbar />
       </div>
 
-      <div className="bg-oreo-black pt-28 pb-32 px-6 text-center print:hidden">
-        <h1 className="font-display text-3xl md:text-4xl font-bold text-oreo-white">
-          Status <span className="text-oreo-cream italic">Pesanan</span>
+      <div className={`${isPaid ? 'bg-green-600' : isPending ? 'bg-orange-500' : 'bg-red-600'} pt-28 pb-32 px-6 text-center transition-colors duration-500 print:hidden`}>
+        <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">
+          {isPaid ? "Terima Kasih!" : isPending ? "Satu Langkah Lagi" : "Ada Kendala"}
         </h1>
+        <p className="text-white/80 text-sm max-w-xs mx-auto">
+          {isPaid ? "Pembayaran kamu sudah kami terima dan pesanan akan segera diproses." : isPending ? "Mohon selesaikan pembayaran agar pesanan bisa kami siapkan." : "Mohon maaf, pembayaran kamu tidak dapat kami verifikasi."}
+        </p>
       </div>
 
       <div className="max-w-xl mx-auto px-6 -mt-20 relative z-10 print:mt-0 print:px-6 print:w-full print:max-w-none">
@@ -103,23 +113,27 @@ export default function OrderStatusPage() {
           
           {/* Header Status */}
           <div className="flex flex-col items-center justify-center text-center border-b-2 border-dashed border-oreo-light pb-6 mb-6">
-            {isPaid ? (
-              <CheckCircle size={56} className="text-green-500 mb-3" />
-            ) : isPending ? (
-              <Clock size={56} className="text-yellow-500 mb-3 animate-pulse" />
-            ) : (
-              <XCircle size={56} className="text-red-500 mb-3" />
-            )}
+            <div className={`w-20 h-20 rounded-full ${statusLightColor} flex items-center justify-center mb-4`}>
+              {isPaid ? (
+                <CheckCircle size={40} className="text-green-500" />
+              ) : isPending ? (
+                <Clock size={40} className="text-orange-500 animate-pulse" />
+              ) : (
+                <XCircle size={40} className="text-red-500" />
+              )}
+            </div>
             
+            <div className={`px-4 py-1 rounded-full ${statusLightColor} ${statusBorderColor} border ${statusTextColor} text-[10px] font-bold uppercase tracking-widest mb-3`}>
+              Status: {isPaid ? "Berhasil Bayar" : isPending ? "Menunggu Pembayaran" : "Dibatalkan / Gagal"}
+            </div>
+
             <h2 className="font-display text-2xl font-bold text-oreo-black mb-1">
-              {isPaid ? "Pembayaran Berhasil!" : isPending ? "Menunggu Pembayaran" : "Pembayaran Gagal"}
+              {formatPrice(order.total_price)}
             </h2>
-            <p className="text-oreo-black/50 text-sm">
-              ID Pesanan: <span className="font-mono font-medium text-oreo-black">#{shortId}</span>
+            <p className="text-oreo-black/50 text-xs mt-1">
+              No. Invoice: <span className="font-mono font-medium text-oreo-black">#INV-{shortId}</span>
             </p>
           </div>
-
-          <p className="text-oreo-black text-center font-bold text-3xl mb-6">{formatPrice(order.total_price)}</p>
 
           {/* Details */}
           <div className="space-y-4 text-sm text-oreo-black/70 mb-6">
@@ -162,27 +176,39 @@ export default function OrderStatusPage() {
             </div>
           </div>
 
-          <div className="bg-oreo-cream/30 p-4 rounded-xl mb-2">
-            <h3 className="font-bold text-oreo-black mb-3 text-sm">Rincian Item:</h3>
-            <div className="space-y-2">
+          <div className="bg-slate-50 border-y border-dashed border-slate-200 py-4 mb-6">
+            <h3 className="font-bold text-oreo-black mb-3 text-[10px] uppercase tracking-widest px-2">Rincian Pesanan</h3>
+            <div className="space-y-3 px-2">
               {order.order_items.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-sm">
-                  <span className="text-oreo-black/70">
-                    <span className="font-medium text-oreo-black">{item.quantity}x</span> {item.product_name}
-                  </span>
-                  <span className="text-oreo-black font-medium">{formatPrice(item.price_at_order * item.quantity)}</span>
+                <div key={idx} className="flex justify-between text-sm items-start gap-4">
+                  <div className="flex-1">
+                    <p className="font-bold text-oreo-black truncate leading-tight">{item.product_name}</p>
+                    <p className="text-[10px] text-oreo-black/40">{item.quantity} x {formatPrice(item.price_at_order)}</p>
+                  </div>
+                  <span className="text-oreo-black font-semibold text-xs whitespace-nowrap">{formatPrice(item.price_at_order * item.quantity)}</span>
                 </div>
               ))}
             </div>
+            <div className="mt-4 pt-3 border-t border-dashed border-slate-200 px-2 flex justify-between items-center">
+               <span className="text-xs font-bold text-oreo-black">TOTAL</span>
+               <span className="text-lg font-black text-oreo-black">{formatPrice(order.total_price)}</span>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-[10px] text-oreo-black/30 italic">Terima kasih sudah jajan di SweetMelt! 🍪</p>
+            <p className="text-[8px] text-oreo-black/20 mt-1 uppercase tracking-tighter">Generated by SweetMelt System</p>
           </div>
         </div>
 
-        {/* Squiggly bottom receipt border effect */}
-        <div className="h-4 bg-oreo-white border-x border-b border-oreo-light rounded-b-lg flex print:hidden" style={{
-          backgroundImage: "radial-gradient(circle at 10px 10px, transparent 10px, #ffffff 11px)",
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 -10px"
-        }} />
+        {/* Decorative receipt bottom edge */}
+        <div className="relative h-6 w-full overflow-hidden print:hidden">
+          <div className="absolute top-0 left-0 w-full flex">
+            {[...Array(20)].map((_, i) => (
+              <div key={i} className="w-[5%] aspect-square bg-oreo-white border-b border-r border-oreo-light transform -rotate-45 -translate-y-1/2" />
+            ))}
+          </div>
+        </div>
 
         {/* Action Buttons */}
         <div className="mt-8 flex flex-col gap-3 print:hidden">
@@ -228,7 +254,10 @@ export default function OrderStatusPage() {
                   }
                   try {
                     const { data, error } = await supabase.functions.invoke("create-payment", {
-                      body: { order_id: order.id }
+                      body: { 
+                        order_id: order.id,
+                        frontend_url: window.location.origin 
+                      }
                     });
                     if (data?.paymentUrl) window.location.href = data.paymentUrl;
                     else alert("Gagal memproses pembayaran: " + (error?.message || "Silakan hubungi admin."));
