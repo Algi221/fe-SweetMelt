@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { ShoppingCart, Menu, X, Share2 } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 
+import { motion, AnimatePresence } from "framer-motion";
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -26,9 +28,28 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Body lock scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [mobileOpen]);
+
   // On non-home pages, always show dark navbar
   const isHome = pathname === "/";
   const showDark = !isHome || scrolled || !heroBg;
+
+  const menuLinks = [
+    { href: "/", label: "Beranda" },
+    { href: "/menu", label: "Menu Donat" },
+    { href: "/order-history", label: "Riwayat Pesanan" },
+    { href: "/about", label: "Tentang Kami" },
+    { href: "/share", label: "Bagikan Kebahagiaan" },
+    { href: "/admin/login", label: "Portal Admin" }
+  ];
 
   return (
     <>
@@ -44,20 +65,14 @@ export default function Navbar() {
 
             {/* Left nav links */}
             <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className={showDark ? "nav-link" : "nav-link-white"}>
+              <Link href="/" className={showDark ? "nav-link font-medium" : "nav-link-white"}>
                 Beranda
               </Link>
-              <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-semibold" : ""}`}>
+              <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-bold text-lumer" : ""}`}>
                 Menu
               </Link>
-              <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-semibold" : ""}`}>
+              <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-bold text-lumer" : ""}`}>
                 Pesanan
-              </Link>
-              <Link href="/share" className={`${showDark ? "nav-link" : "nav-link-white"} flex items-center gap-1 ${pathname === "/share" ? "font-semibold" : ""}`}>
-                <Share2 size={13} /> Share
-              </Link>
-              <Link href="/admin/login" className={`${showDark ? "nav-link" : "nav-link-white"} opacity-40 hover:opacity-100 transition-opacity`}>
-                Admin
               </Link>
             </div>
 
@@ -66,7 +81,6 @@ export default function Navbar() {
               href="/"
               className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
             >
-              {/* Oreo cookie SVG logo */}
               <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${showDark ? "bg-oreo-black" : "bg-oreo-white"}`}>
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${showDark ? "border-oreo-white" : "border-oreo-black"}`}>
                   <div className={`w-2 h-2 rounded-full ${showDark ? "bg-oreo-white" : "bg-oreo-black"}`} />
@@ -78,13 +92,16 @@ export default function Navbar() {
             </Link>
 
             {/* Right items */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/about" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/about" ? "font-semibold text-lumer" : ""}`}>
-                Tentang Kami
+            <div className="flex items-center gap-4 md:gap-8 ml-auto md:ml-0">
+              <Link href="/share" className={`hidden lg:flex items-center gap-1 ${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/share" ? "font-semibold" : ""}`}>
+                <Share2 size={13} /> Share
+              </Link>
+              <Link href="/about" className={`hidden md:block ${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/about" ? "font-bold text-lumer" : ""}`}>
+                Tentang
               </Link>
               <Link
                 href="/cart"
-                className={`relative flex items-center gap-1.5 font-semibold text-sm px-4 py-2 rounded-full transition-all duration-300 ${
+                className={`relative flex items-center gap-1.5 font-bold text-xs md:text-sm px-4 md:px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm ${
                   showDark
                     ? "bg-oreo-black text-oreo-white hover:bg-oreo-gray"
                     : "bg-oreo-white text-oreo-black hover:bg-oreo-cream"
@@ -92,51 +109,103 @@ export default function Navbar() {
                 id="cart-button"
               >
                 <ShoppingCart size={15} />
-                <span>Keranjang</span>
+                <span className="hidden sm:inline">Keranjang</span>
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-lumer text-oreo-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center">
-                    {totalItems > 9 ? "9+" : totalItems}
+                  <span className="absolute -top-2 -right-1 bg-lumer text-oreo-white w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center border-2 border-oreo-white">
+                    {totalItems}
                   </span>
                 )}
               </Link>
-            </div>
 
-            {/* Mobile toggle */}
-            <button
-              className={`md:hidden ml-auto transition-colors ${showDark ? "text-oreo-black hover:text-lumer" : "text-oreo-white hover:text-oreo-cream"}`}
-              onClick={() => setMobileOpen(!mobileOpen)}
-              id="mobile-menu-toggle"
-            >
-              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              {/* Mobile toggle */}
+              <button
+                className={`md:hidden p-2 rounded-xl transition-all ${showDark ? "text-oreo-black bg-oreo-cream/30" : "text-oreo-white bg-white/10"}`}
+                onClick={() => setMobileOpen(true)}
+                id="mobile-menu-toggle"
+              >
+                <Menu size={24} />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden glassmorphism-light mt-2 mx-4 rounded-2xl p-5 animate-fade-in border border-oreo-light shadow-oreo-lg">
-            <div className="flex flex-col gap-4">
-              {[
-                { href: "/", label: "Beranda" },
-                { href: "/menu", label: "Menu" },
-                { href: "/order-history", label: "Pesanan" },
-                { href: "/about", label: "Tentang Kami" },
-                { href: "/share", label: "📲 Bagikan" },
-                { href: "/admin/login", label: "Admin" }
-              ].map((l) => (
-                <Link key={l.href} href={l.href} className="nav-link text-base border-b border-oreo-light pb-2 last:border-none" onClick={() => setMobileOpen(false)}>
-                  {l.label}
-                </Link>
-              ))}
-              <div className="oreo-divider" />
-              <Link href="/cart" className="btn-primary text-center text-sm flex items-center justify-center gap-2" onClick={() => setMobileOpen(false)}>
-                <ShoppingCart size={15} />
-                Keranjang {totalItems > 0 && `(${totalItems})`}
-              </Link>
-            </div>
-          </div>
-        )}
       </nav>
+
+      {/* Full Modal Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[60] bg-oreo-black flex flex-col p-8"
+          >
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none overflow-hidden text-oreo-white/20 select-none flex flex-wrap gap-10 p-10 font-black text-6xl rotate-12">
+               {Array(30).fill(0).map((_, i) => <span key={i}>SweetMelt</span>)}
+            </div>
+
+            <div className="flex justify-between items-center relative z-10">
+               <div className="flex items-center gap-2">
+                 <div className="w-10 h-10 rounded-full bg-oreo-white flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full border-2 border-oreo-black flex items-center justify-center">
+                       <div className="w-2.5 h-2.5 bg-oreo-black rounded-full" />
+                    </div>
+                 </div>
+                 <span className="font-display text-2xl font-bold text-oreo-white">Sweet<span className="text-lumer">Melt</span></span>
+               </div>
+               <button 
+                 onClick={() => setMobileOpen(false)}
+                 className="w-12 h-12 rounded-full bg-oreo-white/10 text-oreo-white flex items-center justify-center hover:bg-lumer hover:scale-110 transition-all"
+               >
+                 <X size={28} />
+               </button>
+            </div>
+
+            <div className="flex-1 flex flex-col justify-center items-center gap-8 relative z-10">
+               {menuLinks.map((link, idx) => (
+                 <motion.div
+                   key={link.href}
+                   initial={{ opacity: 0, y: 20 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ delay: 0.1 + idx * 0.05 }}
+                 >
+                   <Link 
+                     href={link.href} 
+                     onClick={() => setMobileOpen(false)}
+                     className={`text-3xl font-display font-bold transition-all tracking-tight ${
+                       pathname === link.href ? "text-lumer scale-110" : "text-oreo-white/60 hover:text-oreo-white"
+                     }`}
+                   >
+                     {link.label}
+                   </Link>
+                 </motion.div>
+               ))}
+            </div>
+
+            <div className="mt-auto space-y-4 relative z-10">
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 transition={{ delay: 0.5 }}
+               >
+                 <Link 
+                   href="/cart" 
+                   onClick={() => setMobileOpen(false)}
+                   className="w-full py-5 rounded-3xl bg-lumer text-oreo-white font-black text-xl flex items-center justify-center gap-4 shadow-xl shadow-lumer/20 active:scale-95 transition-transform"
+                 >
+                   <ShoppingCart size={24} />
+                   Buka Keranjang {totalItems > 0 && <span>({totalItems})</span>}
+                 </Link>
+               </motion.div>
+               
+               <p className="text-center text-oreo-white/20 text-xs font-bold uppercase tracking-widest">
+                  🍪 lumer di mulut, manis di hati 🍪
+               </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
