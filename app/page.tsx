@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import CommentSection from "@/components/CommentSection";
 import TextType from "@/components/TextType";
 import ShinyText from "@/components/ShinyText";
 import CountUp from "@/components/CountUp";
@@ -308,6 +309,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ─── LIVE COMMENTS ─── */}
+      <CommentSection />
 
       {/* ─── FOOTER: Robust Grid Layout ─── */}
       <footer className="bg-oreo-white border-t border-oreo-light pt-20 pb-10 px-6">

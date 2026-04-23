@@ -89,6 +89,10 @@ export default function CartPage() {
       const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
       if (itemsErr) throw new Error("Gagal menyimpan item pesanan");
 
+      // Save phone number for history lookup
+      localStorage.setItem("sweetmelt_customer_phone", form.phone);
+      localStorage.setItem("sweetmelt_customer_name", form.name);
+
       clearCart();
 
       // If Cash, just go to order page.

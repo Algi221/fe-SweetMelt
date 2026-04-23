@@ -50,6 +50,12 @@ export default function Navbar() {
               <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-semibold" : ""}`}>
                 Menu
               </Link>
+              <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-semibold" : ""}`}>
+                Pesanan
+              </Link>
+              <Link href="/#comments" className={showDark ? "nav-link" : "nav-link-white"}>
+                Live Chat
+              </Link>
               <Link href="/share" className={`${showDark ? "nav-link" : "nav-link-white"} flex items-center gap-1 ${pathname === "/share" ? "font-semibold" : ""}`}>
                 <Share2 size={13} /> Share
               </Link>
@@ -116,6 +122,8 @@ export default function Navbar() {
               {[
                 { href: "/", label: "Beranda" },
                 { href: "/menu", label: "Menu" },
+                { href: "/order-history", label: "Riwayat Pesanan" },
+                { href: "/#comments", label: "Live Chat" },
                 { href: "/#about", label: "Tentang Kami" },
                 { href: "/share", label: "📲 Bagikan" },
                 { href: "/admin/login", label: "Admin" }
