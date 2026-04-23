@@ -106,7 +106,25 @@ export default function CartPage() {
       clearCart();
 
       // If Cash, just go to order page.
+      // If Cash, notify telegram then just go to order page.
       if (paymentMethod === "cash") {
+        try {
+          await supabase.functions.invoke('telegram-notify', {
+            body: { 
+              message: `
+💵 <b>Pesanan Baru (COD/Tunai)!</b> 💵
+
+<b>Pelanggan:</b> ${form.name}
+<b>No. WhatsApp:</b> ${form.phone}
+<b>Total:</b> ${formatPrice(subtotal)}
+<b>Status:</b> BELUM BAYAR (Tunai)
+
+<b>Alamat:</b> ${form.address}
+              `.trim()
+            }
+          });
+        } catch (err) { console.error("Notify failed", err); }
+        
         router.push(`/order/${orderId}`);
         return;
       }
