@@ -23,35 +23,63 @@ export default function AboutPage() {
     <main className="bg-white min-h-screen font-sans selection:bg-lumer selection:text-oreo-black overflow-x-hidden">
       <Navbar />
       
-      {/* Title / Hero - Zero Images, Pure Typography */}
-      <section className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
-        <Reveal>
-          <div className="mb-12">
-            <Image 
-              src="/images/logo/SwwetMelt tpk..png" 
-              alt="SweetMelt Logo" 
-              width={180} 
-              height={180}
-              className="w-32 md:w-48 h-auto object-contain"
-              priority
-            />
+      {/* Title / Hero - Creative & Dynamic Layout */}
+      <section className="pt-40 pb-20 px-6 max-w-7xl mx-auto relative">
+        {/* Abstract Background Decoration */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lumer/5 rounded-full blur-[120px] -z-10" />
+        <div className="absolute -left-20 top-40 w-[300px] h-[300px] bg-oreo-black/5 rounded-full blur-[100px] -z-10" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-8">
+            <Reveal>
+              <div className="inline-block bg-lumer/10 text-lumer px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+                Behind the Melt
+              </div>
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-display text-oreo-black tracking-tighter leading-[0.85] mb-12">
+                Sebuah Cerita <br />
+                Tentang Perjalanan <span className="text-lumer italic">SweetMelt.</span>
+              </h1>
+            </Reveal>
+            
+            <Reveal delay={0.2}>
+              <div className="max-w-2xl">
+                <p className="text-xl md:text-2xl text-oreo-black/60 leading-relaxed font-medium">
+                  Ini bukan cuma soal jualan makanan. Ini soal gimana kami bertahan di tengah badai ego dan kerusuhan.
+                </p>
+              </div>
+            </Reveal>
           </div>
-          <div className="inline-block bg-lumer/10 text-lumer px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8">
-            Behind the Melt
+
+          <div className="lg:col-span-4 flex justify-center lg:justify-end">
+            <Reveal delay={0.3}>
+              <motion.div
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                className="relative group"
+              >
+                {/* Decorative rings */}
+                <div className="absolute inset-0 bg-lumer/20 rounded-full blur-3xl group-hover:bg-lumer/40 transition-all duration-700 -z-10" />
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute -inset-4 border-2 border-dashed border-lumer/20 rounded-full"
+                />
+                
+                <div className="relative p-8 bg-white/40 backdrop-blur-md rounded-full border border-white/20 shadow-2xl overflow-hidden">
+                  <Image 
+                    src="/images/logo/SwwetMelt tpk..png" 
+                    alt="SweetMelt Logo" 
+                    width={400} 
+                    height={400}
+                    className="w-48 md:w-64 h-auto object-contain relative z-10 drop-shadow-2xl"
+                    priority
+                  />
+                  {/* Subtle shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                </div>
+              </motion.div>
+            </Reveal>
           </div>
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-display text-oreo-black tracking-tighter leading-[0.85] mb-12">
-            Sebuah Cerita <br />
-            Tentang Perjalanan <span className="text-lumer italic">SweetMelt.</span>
-          </h1>
-        </Reveal>
-        
-        <Reveal delay={0.2}>
-          <div className="max-w-2xl">
-            <p className="text-xl md:text-2xl text-oreo-black/60 leading-relaxed font-medium">
-              Ini bukan cuma soal jualan makanan. Ini soal gimana kami bertahan di tengah badai ego dan kerusuhan.
-            </p>
-          </div>
-        </Reveal>
+        </div>
       </section>
 
       {/* The Story Section */}
