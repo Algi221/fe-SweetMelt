@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
@@ -25,6 +26,16 @@ export default function AboutPage() {
       {/* Title / Hero - Zero Images, Pure Typography */}
       <section className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
         <Reveal>
+          <div className="mb-12">
+            <Image 
+              src="/images/logo/SwwetMelt tpk..png" 
+              alt="SweetMelt Logo" 
+              width={180} 
+              height={180}
+              className="w-32 md:w-48 h-auto object-contain"
+              priority
+            />
+          </div>
           <div className="inline-block bg-lumer/10 text-lumer px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8">
             Behind the Melt
           </div>
