@@ -32,10 +32,9 @@ import {
   Trash2,
   PieChart,
   Home,
-  CheckCircle2,
-  Clock,
   ShieldCheck,
-  Smartphone
+  Smartphone,
+  X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -96,6 +95,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   
   // Settings State
   const [settings, setSettings] = useState({
@@ -132,6 +132,22 @@ export default function AdminDashboard() {
       if (mRes.data) setComments(mRes.data);
     } catch (e) {
       toast.error("Cloud Sync Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteOrder = async (orderId: string) => {
+    if (!window.confirm("ARE YOU SURE YOU WANT TO PURGE THIS RECORD? DATA WILL BE LOST PERMANENTLY.")) return;
+    try {
+      setLoading(true);
+      const { error } = await supabase.from('orders').delete().eq('id', orderId);
+      if (!error) {
+        toast.success("Record Purged from Matrix");
+        fetchAllData();
+      }
+    } catch (e) {
+      toast.error("Purge Operation Failed");
     } finally {
       setLoading(false);
     }
@@ -176,17 +192,30 @@ export default function AdminDashboard() {
   // --- Chart Data Logic (Last 7 Days) ---
   const chartPoints = useMemo(() => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const now = new Date();
+    
+    // If we have orders, base the timeline on the most recent order to ensure we see data
+    // Otherwise use current date
+    const lastOrderDate = orders.length > 0 ? new Date(orders[0].created_at) : new Date();
+    const referenceDate = new Date(lastOrderDate);
+    
     const records = Array(7).fill(0).map((_, i) => {
-      const d = new Date();
-      d.setDate(now.getDate() - (6 - i));
+      const d = new Date(referenceDate);
+      d.setDate(referenceDate.getDate() - (6 - i));
       const dayStr = days[d.getDay()];
+      
       const dayOrders = orders.filter(o => {
         const oDate = new Date(o.created_at);
-        return oDate.getDate() === d.getDate() && oDate.getMonth() === d.getMonth();
+        return oDate.getDate() === d.getDate() && oDate.getMonth() === d.getMonth() && oDate.getFullYear() === d.getFullYear();
       });
-      const revenue = dayOrders.reduce((sum, o) => sum + (o.total_price || 0), 0) / 100000; // Normalized for chart
-      return { label: dayStr, value: Math.min(revenue, 90) + 10 }; // Scale for SVG viewbox
+      
+      // Calculate revenue and add a slight base "jitter" for aesthetics if empty
+      const actualRevenue = dayOrders.reduce((sum, o) => sum + (o.total_price || 0), 0) / 100000;
+      const aestheticBase = 10 + (Math.sin(i * 1.5) * 2); // Subtle wave for visual interest
+      
+      return { 
+        label: dayStr, 
+        value: Math.min(actualRevenue, 80) + aestheticBase 
+      };
     });
     return records;
   }, [orders]);
@@ -203,7 +232,26 @@ export default function AdminDashboard() {
   const svgPath = useMemo(() => {
     if (chartPoints.length === 0) return "";
     const step = 400 / (chartPoints.length - 1);
-    return chartPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${i * step},${100 - p.value}`).join(' ');
+    
+    // Smooth Bezier Curve Path
+    let path = `M0,${100 - chartPoints[0].value}`;
+    
+    for (let i = 0; i < chartPoints.length - 1; i++) {
+      const x1 = i * step;
+      const y1 = 100 - chartPoints[i].value;
+      const x2 = (i + 1) * step;
+      const y2 = 100 - chartPoints[i + 1].value;
+      
+      // Control points for Cubic Bezier
+      const cp1x = x1 + (x2 - x1) / 2;
+      const cp1y = y1;
+      const cp2x = x1 + (x2 - x1) / 2;
+      const cp2y = y2;
+      
+      path += ` C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+    }
+    
+    return path;
   }, [chartPoints]);
 
   return (
@@ -236,7 +284,7 @@ export default function AdminDashboard() {
             ].map((item) => (
               <button 
                 key={item.name}
-                onClick={() => { setActiveTab(item.name); setSearchTerm(""); }}
+                onClick={() => { setActiveTab(item.name); setSearchTerm(""); setSelectedOrders([]); }}
                 className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-300 group ${activeTab === item.name ? 'bg-white/10 text-white shadow-xl translate-x-1' : 'hover:bg-white/5 hover:text-white'}`}
               >
                 <div className="flex items-center gap-4">
@@ -289,7 +337,7 @@ export default function AdminDashboard() {
                   placeholder="Search infrastructure..."
                   className="w-full bg-slate-50 border-none rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-lumer/30 transition-all placeholder:text-slate-300"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => { setSearchTerm(e.target.value); setSelectedOrders([]); }}
                 />
              </div>
              <div className="flex items-center gap-4">
@@ -468,35 +516,59 @@ export default function AdminDashboard() {
                       <h2 className="text-2xl font-black text-slate-900 uppercase p-2 border-l-4 border-lumer pl-6">Logistics Matrix</h2>
                       <p className="text-xs font-bold text-slate-400 mt-2 ml-6 italic tracking-tight underline decoration-lumer/30 underline-offset-4">Analyzing {filteredData.length} sequence records.</p>
                     </div>
-                    <div className="flex gap-4">
-                       <div className="relative group">
-                          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-lumer transition-colors" size={16} />
-                          <select className="pl-12 pr-12 py-3.5 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-900 outline-none hover:shadow-xl hover:-translate-y-0.5 transition-all appearance-none cursor-pointer">
-                             <option>Matrix State: All</option>
-                             {Object.entries(statusConfig).map(([k,v]) => <option key={k} value={k}>{v.label.toUpperCase()}</option>)}
-                          </select>
-                       </div>
-                    </div>
-                 </div>
+                  </div>
 
-                 <div className="overflow-x-auto px-6">
-                    <table className="w-full text-left">
-                        <thead className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
-                          <tr>
-                            <th className="py-8 px-6 underline decoration-slate-100 underline-offset-[12px]">Identification</th>
-                            <th className="py-8 px-4">Inventory Data</th>
-                            <th className="py-8 px-4">Financials</th>
-                            <th className="py-8 px-4">Status Map</th>
-                            <th className="py-8 px-6 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                           {filteredData.map((order: any) => {
-                             const status = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
-                             return (
-                               <tr key={order.id} className="group hover:bg-slate-50/70 transition-all duration-300">
-                                 <td className="py-10 px-6">
-                                    <div className="flex items-center gap-5">
+                {/* Bulk Actions Helper */}
+                <div className="px-10 py-4 bg-lumer/5 border-b border-slate-50 flex items-center justify-between">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                     {selectedOrders.length > 0 ? `${selectedOrders.length} nodes locked in selection` : "Select nodes to initialize batch operations"}
+                   </p>
+                </div>
+
+                <div className="overflow-x-auto px-6">
+                   <table className="w-full text-left">
+                       <thead className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+                         <tr>
+                           <th className="py-8 px-6">
+                             <div className="flex items-center">
+                               <input 
+                                 type="checkbox"
+                                 onChange={(e) => {
+                                   if (e.target.checked) setSelectedOrders(filteredData.map(o => o.id));
+                                   else setSelectedOrders([]);
+                                 }}
+                                 checked={selectedOrders.length === filteredData.length && filteredData.length > 0}
+                                 className="w-5 h-5 rounded-lg border-2 border-slate-200 checked:bg-lumer accent-lumer cursor-pointer transition-all"
+                               />
+                             </div>
+                           </th>
+                           <th className="py-8 px-6 underline decoration-slate-100 underline-offset-[12px]">Identification</th>
+                           <th className="py-8 px-4">Inventory Data</th>
+                           <th className="py-8 px-4">Financials</th>
+                           <th className="py-8 px-4">Status Map</th>
+                           <th className="py-8 px-6 text-right">Actions</th>
+                         </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-50">
+                          {filteredData.map((order: any) => {
+                            const status = statusConfig[order.status.toLowerCase()] || statusConfig.pending;
+                            const isSelected = selectedOrders.includes(order.id);
+                            return (
+                              <tr key={order.id} className={`group hover:bg-slate-50/70 transition-all duration-300 ${isSelected ? 'bg-lumer/5' : ''}`}>
+                                <td className="py-10 px-6">
+                                   <input 
+                                     type="checkbox"
+                                     checked={isSelected}
+                                     onChange={() => {
+                                       setSelectedOrders(prev => 
+                                         prev.includes(order.id) ? prev.filter(i => i !== order.id) : [...prev, order.id]
+                                       );
+                                     }}
+                                     className="w-5 h-5 rounded-lg border-2 border-slate-200 checked:bg-lumer accent-lumer cursor-pointer transition-all"
+                                   />
+                                </td>
+                                <td className="py-10 px-6">
+                                   <div className="flex items-center gap-5">
                                        <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center font-black group-hover:bg-lumer transition-all shadow-md transform rotate-3 group-hover:rotate-0">{order.customer_name.charAt(0)}</div>
                                        <div>
                                           <p className="font-black text-sm text-slate-900 tracking-tight leading-none mb-1.5 underline decoration-transparent group-hover:decoration-lumer transition-all">{order.customer_name}</p>
@@ -528,7 +600,7 @@ export default function AdminDashboard() {
                                  <td className="py-10 px-6 text-right">
                                     <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
                                        <a href={`/order/${order.id}`} target="_blank" className="w-11 h-11 flex items-center justify-center bg-white rounded-2xl shadow-xl border border-slate-100 text-slate-300 hover:text-slate-950 transition-all hover:scale-110 active:scale-95"><ExternalLink size={20} /></a>
-                                       <button className="w-11 h-11 flex items-center justify-center bg-white rounded-2xl shadow-xl border border-slate-100 text-slate-300 hover:text-rose-500 transition-all hover:scale-110 active:scale-95"><Trash2 size={20} /></button>
+                                       <button onClick={() => deleteOrder(order.id)} className="w-11 h-11 flex items-center justify-center bg-white rounded-2xl shadow-xl border border-slate-100 text-slate-300 hover:text-rose-500 transition-all hover:scale-110 active:scale-95"><Trash2 size={20} /></button>
                                     </div>
                                  </td>
                                </tr>
@@ -688,6 +760,96 @@ export default function AdminDashboard() {
           </AnimatePresence>
 
         </div>
+
+        {/* BULK ACTION BAR */}
+        <AnimatePresence>
+          {selectedOrders.length > 0 && (
+            <motion.div 
+              initial={{ y: 100, x: "-50%", opacity: 0 }}
+              animate={{ y: 0, x: "-50%", opacity: 1 }}
+              exit={{ y: 100, x: "-50%", opacity: 0 }}
+              className="fixed bottom-10 left-1/2 bg-slate-950 text-white px-10 py-6 rounded-[32px] shadow-2xl flex flex-col md:flex-row items-center gap-8 z-[200] border border-white/10 backdrop-blur-2xl ring-1 ring-white/10"
+            >
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 bg-lumer rounded-2xl flex items-center justify-center text-slate-950 shadow-xl shadow-lumer/20">
+                  <ShoppingBag size={24} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-lumer mb-1">Batch Operations</span>
+                  <span className="text-lg font-black tracking-tighter">{selectedOrders.length} Records Selected</span>
+                </div>
+              </div>
+              
+              <div className="hidden md:block h-12 w-[1px] bg-white/10" />
+              
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 whitespace-nowrap">Transition Matrix to:</span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <button
+                      key={key}
+                      onClick={async () => {
+                        try {
+                          setLoading(true);
+                          const { error } = await supabase.from('orders').update({ status: key }).in('id', selectedOrders);
+                          if (!error) {
+                            toast.success(`Batch Transition: ${config.label}`);
+                            setSelectedOrders([]);
+                            fetchAllData();
+                          }
+                        } catch (e) {
+                          toast.error("Batch Protocol Failed");
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] transition-all hover:scale-110 active:scale-95 shadow-lg ${config.bg} ${config.color} border border-transparent hover:border-white/20`}
+                    >
+                      {config.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="hidden md:block h-12 w-[1px] bg-white/10" />
+
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 whitespace-nowrap">Security Protocol:</span>
+                <button
+                  onClick={async () => {
+                    if (!window.confirm(`PURGE ${selectedOrders.length} RECORDS FROM THE MATRIX? THIS ACTION IS IRREVERSIBLE.`)) return;
+                    try {
+                      setLoading(true);
+                      const { error } = await supabase.from('orders').delete().in('id', selectedOrders);
+                      if (!error) {
+                        toast.success(`Batch Purge Complete: ${selectedOrders.length} Nodes`);
+                        setSelectedOrders([]);
+                        fetchAllData();
+                      }
+                    } catch (e) {
+                      toast.error("Batch Purge Failed");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="px-6 py-2.5 bg-rose-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all hover:bg-rose-600 hover:scale-110 active:scale-95 shadow-lg shadow-rose-500/20"
+                >
+                  Purge Selected
+                </button>
+              </div>
+
+              <div className="md:ml-4 flex gap-2">
+                <button 
+                  onClick={() => setSelectedOrders([])}
+                  className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all border border-white/5"
+                  title="Clear Selection"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <style jsx global>{`

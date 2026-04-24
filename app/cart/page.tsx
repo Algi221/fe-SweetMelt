@@ -200,35 +200,42 @@ export default function CartPage() {
               <ShoppingBag size={13} /> Item ({items.length})
             </p>
             {items.map((item) => (
-              <div key={`${item.id}-${item.variant}`} className="flex items-center gap-4 bg-oreo-white border border-oreo-light rounded-2xl p-4 shadow-oreo">
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-oreo-cream">
-                  <img src={sanitizeImageUrl(item.image_url)} alt={item.name} className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-oreo-black font-medium truncate">{item.name}</p>
-                    {item.variant && (
-                      <span className="px-2 py-0.5 rounded-md bg-oreo-cream text-oreo-black/60 text-[10px] font-bold uppercase tracking-wider">
-                        {item.variant}
-                      </span>
-                    )}
+              <div key={`${item.id}-${item.variant}`} className="flex flex-col sm:flex-row sm:items-center gap-4 bg-oreo-white border border-oreo-light rounded-2xl p-4 shadow-oreo">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-oreo-cream">
+                    <img src={sanitizeImageUrl(item.image_url)} alt={item.name} className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   </div>
-                  <p className="text-oreo-black/60 text-sm font-bold">{formatPrice(item.price)}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-oreo-black font-medium truncate">{item.name}</p>
+                      {item.variant && (
+                        <span className="px-2 py-0.5 rounded-md bg-oreo-cream text-oreo-black/60 text-[10px] font-bold uppercase tracking-wider">
+                          {item.variant}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-oreo-black/60 text-sm font-bold">{formatPrice(item.price)}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => updateQty(item.id, item.quantity - 1, item.variant)} className="w-7 h-7 rounded-full border border-oreo-light text-oreo-black/50 hover:border-oreo-black hover:text-oreo-black flex items-center justify-center transition-all">
-                    <Minus size={12} />
-                  </button>
-                  <span className="text-oreo-black w-5 text-center font-semibold">{item.quantity}</span>
-                  <button onClick={() => updateQty(item.id, item.quantity + 1, item.variant)} className="w-7 h-7 rounded-full bg-oreo-black text-oreo-white hover:bg-oreo-gray flex items-center justify-center transition-all">
-                    <Plus size={12} />
-                  </button>
+
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-0 border-oreo-light/50">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => updateQty(item.id, item.quantity - 1, item.variant)} className="w-8 h-8 rounded-full border border-oreo-light text-oreo-black/50 hover:border-oreo-black hover:text-oreo-black flex items-center justify-center transition-all bg-white">
+                      <Minus size={12} />
+                    </button>
+                    <span className="text-oreo-black w-5 text-center font-bold">{item.quantity}</span>
+                    <button onClick={() => updateQty(item.id, item.quantity + 1, item.variant)} className="w-8 h-8 rounded-full bg-oreo-black text-oreo-white hover:bg-oreo-gray flex items-center justify-center transition-all">
+                      <Plus size={12} />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <p className="text-oreo-black font-semibold text-sm sm:w-24 text-right">{formatPrice(item.price * item.quantity)}</p>
+                    <button onClick={() => removeItem(item.id, item.variant)} className="p-2 -mr-2 text-oreo-black/20 hover:text-red-500 transition-colors">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-oreo-black font-semibold text-sm w-20 text-right">{formatPrice(item.price * item.quantity)}</p>
-                <button onClick={() => removeItem(item.id, item.variant)} className="text-oreo-black/20 hover:text-red-500 transition-colors">
-                  <Trash2 size={15} />
-                </button>
               </div>
             ))}
             

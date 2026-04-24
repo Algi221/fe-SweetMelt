@@ -60,39 +60,43 @@ export default function Navbar() {
             : "bg-transparent py-5"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between relative h-14 md:h-16">
 
-            {/* Left nav links */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/" className={showDark ? "nav-link font-medium" : "nav-link-white"}>
-                Beranda
-              </Link>
-              <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-bold text-lumer" : ""}`}>
-                Menu
-              </Link>
-              <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-bold text-lumer" : ""}`}>
-                Pesanan
+            {/* Left nav links / Mobile Spacer */}
+            <div className="flex-1 flex items-center">
+              <div className="hidden md:flex items-center gap-8">
+                <Link href="/" className={showDark ? "nav-link font-medium" : "nav-link-white"}>
+                  Beranda
+                </Link>
+                <Link href="/menu" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/menu" ? "font-bold text-lumer" : ""}`}>
+                  Menu
+                </Link>
+                <Link href="/order-history" className={`${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/order-history" ? "font-bold text-lumer" : ""}`}>
+                  Pesanan
+                </Link>
+              </div>
+            </div>
+
+            {/* Center logo — flex centered on mobile, absolute on desktop to keep it perfect */}
+            <div className="flex-1 md:absolute md:left-1/2 md:-translate-x-1/2 flex justify-center md:block z-10">
+              <Link
+                href="/"
+                className="flex items-center gap-2 group"
+              >
+                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${showDark ? "bg-oreo-black" : "bg-oreo-white"}`}>
+                  <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full border-2 flex items-center justify-center ${showDark ? "border-oreo-white" : "border-oreo-black"}`}>
+                    <div className={`w-1.5 h-1.5 md:w-2 h-2 rounded-full ${showDark ? "bg-oreo-white" : "bg-oreo-black"}`} />
+                  </div>
+                </div>
+                <span className={`font-display text-lg md:text-xl font-bold tracking-wide transition-colors duration-300 ${showDark ? "text-oreo-black" : "text-oreo-white"}`}>
+                  Sweet<span className={showDark ? "text-lumer" : "text-caramel"}>Melt</span>
+                </span>
               </Link>
             </div>
 
-            {/* Center logo — absolutely centered */}
-            <Link
-              href="/"
-              className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group"
-            >
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${showDark ? "bg-oreo-black" : "bg-oreo-white"}`}>
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${showDark ? "border-oreo-white" : "border-oreo-black"}`}>
-                  <div className={`w-2 h-2 rounded-full ${showDark ? "bg-oreo-white" : "bg-oreo-black"}`} />
-                </div>
-              </div>
-              <span className={`font-display text-xl font-bold tracking-wide transition-colors duration-300 ${showDark ? "text-oreo-black" : "text-oreo-white"}`}>
-                Sweet<span className={showDark ? "text-lumer" : "text-caramel"}>Melt</span>
-              </span>
-            </Link>
-
             {/* Right items */}
-            <div className="flex items-center gap-4 md:gap-8 ml-auto md:ml-0">
+            <div className="flex items-center justify-end gap-2 md:gap-8 flex-1">
               <Link href="/share" className={`hidden lg:flex items-center gap-1 ${showDark ? "nav-link" : "nav-link-white"} ${pathname === "/share" ? "font-semibold" : ""}`}>
                 <Share2 size={13} /> Share
               </Link>
@@ -101,17 +105,17 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/cart"
-                className={`relative flex items-center gap-1.5 font-bold text-xs md:text-sm px-4 md:px-5 py-2.5 rounded-full transition-all duration-300 shadow-sm ${
+                className={`relative flex items-center gap-1.5 font-bold text-xs md:text-sm p-2.5 md:px-5 md:py-2.5 rounded-full transition-all duration-300 shadow-sm ${
                   showDark
                     ? "bg-oreo-black text-oreo-white hover:bg-oreo-gray"
                     : "bg-oreo-white text-oreo-black hover:bg-oreo-cream"
                 }`}
                 id="cart-button"
               >
-                <ShoppingCart size={15} />
+                <ShoppingCart size={16} className="md:size-[15px]" />
                 <span className="hidden sm:inline">Keranjang</span>
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-1 bg-lumer text-oreo-white w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center border-2 border-oreo-white">
+                  <span className="absolute -top-1.5 -right-1.5 bg-lumer text-oreo-white w-4.5 h-4.5 md:w-5 md:h-5 rounded-full text-[9px] md:text-[10px] font-black flex items-center justify-center border-2 border-oreo-white">
                     {totalItems}
                   </span>
                 )}
@@ -123,7 +127,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(true)}
                 id="mobile-menu-toggle"
               >
-                <Menu size={24} />
+                <Menu size={22} />
               </button>
             </div>
           </div>
