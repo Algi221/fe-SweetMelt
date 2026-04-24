@@ -161,7 +161,7 @@ export default function OrderHistoryPage() {
                         <div>
                           <p className={`text-[10px] font-bold uppercase tracking-tighter ${selectedOrder?.id === order.id ? "text-lumer" : "text-oreo-black/30"}`}>INV-{order.id.split('-')[0].toUpperCase()}</p>
                           <p className={`text-xs font-bold ${selectedOrder?.id === order.id ? "text-oreo-white" : "text-oreo-black"}`}>
-                            {order.items.length} Item Donat
+                            {order.items.length} Menu Terpilih
                           </p>
                         </div>
                       </div>
